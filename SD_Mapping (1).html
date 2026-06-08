@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Delivery Mapping Form</title>
+  <style>
+    :root {
+      --border: #d6d6d6;
+      --text: #1f2933;
+      --muted: #5f6b7a;
+      --background: #f7f9fb;
+      --section: #ffffff;
+      --accent: #0f766e;
+      --accent-light: #e6f4f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--background);
+      line-height: 1.45;
+    }
+    .form-container {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: var(--section);
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    h1 { margin: 0 0 8px; font-size: 26px; color: var(--accent); }
+    .intro { margin: 0 0 24px; color: var(--muted); font-size: 15px; }
+    h2 {
+      font-size: 18px;
+      margin: 28px 0 8px;
+      padding: 10px 12px;
+      background: var(--accent-light);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+    }
+    h3 { font-size: 15px; margin: 18px 0 8px; color: var(--text); }
+    label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 14px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      background: white;
+    }
+    textarea { min-height: 76px; resize: vertical; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .full { grid-column: 1 / -1; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    th, td { border: 1px solid var(--border); padding: 10px; vertical-align: top; }
+    th { background: #f0f3f6; text-align: left; }
+    .checkbox-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; margin-top: 8px; }
+    .checkbox-item { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+    .checkbox-item input { width: auto; margin-top: 3px; }
+    .definition-box { background: #fbfcfd; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 10px; }
+    .definition-box p { margin: 6px 0; font-size: 14px; }
+    .note, .section-instruction { color: var(--muted); font-size: 13px; margin: 6px 0 10px; }
+    .section-instruction { background: #fbfcfd; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .actions, .row-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+    button { padding: 11px 16px; border: 0; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .primary { background: var(--accent); color: white; }
+    .secondary { background: #e5e7eb; color: #111827; }
+    .small-button { padding: 8px 12px; font-size: 13px; }
+    .records-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .record-card { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+    .record-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: var(--accent-light); cursor: pointer; flex-wrap: wrap; }
+    .record-title { font-weight: 700; color: var(--accent); font-size: 16px; }
+    .record-meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .record-head-actions { display: flex; gap: 8px; align-items: center; }
+    .record-body { padding: 16px; display: none; }
+    .record-card.open .record-body { display: block; }
+    .record-body h4 { margin: 16px 0 6px; font-size: 14px; color: var(--accent); }
+    .record-body h4:first-child { margin-top: 0; }
+    .field-line { font-size: 14px; margin: 4px 0; }
+    .field-line .lbl { font-weight: 700; }
+    .danger { background: #b91c1c; color: #fff; }
+    .empty-records { color: var(--muted); font-size: 14px; padding: 18px; text-align: center; border: 1px dashed var(--border); border-radius: 10px; }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 12px 18px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,0.2); z-index: 1000; opacity: 0; transition: opacity .2s; }
+    .toast.show { opacity: 1; }
+    .edit-banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 700; }
+    @media print {
+      #recordsPanel { display: none; }
+      body { background: white; padding: 0; }
+      .form-container { box-shadow: none; border: 0; }
+      .actions, .row-actions { display: none; }
+      h2 { break-after: avoid; }
+    }
+    @media (max-width: 800px) {
+      body { padding: 12px; }
+      .form-container { padding: 18px; }
+      .grid, .checkbox-group { grid-template-columns: 1fr; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="form-container">
+    <h1>Service Delivery Mapping Form</h1>
+    <p class="intro">Use this form to define service activities, delivery pathways, outcome types, evidence requirements, and KPI measures. Complete one form per service, team, or programme.</p>
+
+    <form>
+      <div id="editBanner" class="edit-banner" style="display:none;">
+        <span>Editing existing record: <span id="editBannerName"></span></span>
+        <button type="button" class="secondary small-button" onclick="cancelEdit()">Cancel edit</button>
+      </div>
+      <h2>Service Information</h2>
+      <p class="section-instruction">Complete this section first so the mapping can be linked to the right service area, manager, programme, and whānau group.</p>
+      <div class="grid">
+        <div><label for="serviceName">Service Name</label><input id="serviceName" name="serviceName" type="text" /></div>
+        <div><label for="teamProgramme">Team / Programme</label><input id="teamProgramme" name="teamProgramme" type="text" /></div>
+        <div><label for="serviceManager">Service Manager</label><input id="serviceManager" name="serviceManager" type="text" /></div>
+        <div><label for="targetPopulation">Target Population</label><input id="targetPopulation" name="targetPopulation" type="text" /></div>
+        <div class="full"><label for="servicePurpose">Primary Service Purpose</label><textarea id="servicePurpose" name="servicePurpose" placeholder="Briefly describe what this service exists to do."></textarea></div>
+      </div>
+
+      <h2>1. Service Activities</h2>
+      <p class="section-instruction">List the main activities kaimahi deliver. Use plain service language, not reporting language. Choose the support type that best describes how the activity is normally delivered.</p>
+      <table>
+        <thead><tr><th>Activity</th><th>Description</th><th>Support Type</th></tr></thead>
+        <tbody id="serviceActivitiesBody"></tbody>
+      </table>
+      <div class="row-actions"><button type="button" class="secondary small-button" onclick="addServiceActivityRow()">Add activity row</button></div>
+
+      <div class="definition-box">
+        <h3>Support Type Definitions</h3>
+        <p><strong>Immediate Need:</strong> Support delivered in response to an urgent issue requiring action within hours, days, or a few contacts.</p>
+        <p><strong>Short Intervention:</strong> Targeted support delivered over a brief period, usually less than 12 weeks.</p>
+        <p><strong>Ongoing Support:</strong> Support requiring multiple contacts and coordinated intervention over time.</p>
+        <p><strong>Goal-Based Support:</strong> Medium to long-term change requiring planning, monitoring, and review.</p>
+        <p><strong>Programme Support:</strong> Structured participation in a group, course, programme, or planned series of activities.</p>
+        <p><strong>Clinical Support:</strong> Assessment, treatment, brief intervention, or other clinically led support.</p>
+        <p><strong>Cultural Support:</strong> Support that strengthens cultural identity, whānau connection, whakapapa, tikanga, marae, iwi, hapū, reo, or other culturally grounded protective factors.</p>
+      </div>
+
+      <h2>2. Goal Planning Rules</h2>
+      <p class="section-instruction">For each activity, decide whether a Goal Plan is required. Select "No" for one-off or short interventions. Select "Yes" when the activity needs planned, reviewed, medium to long-term support. Select "Conditional" when it depends on whānau need or service intensity.</p>
+      <table>
+        <thead><tr><th>Activity</th><th>Goal Plan Required?</th><th>Reason / Condition</th></tr></thead>
+        <tbody id="goalRulesBody"></tbody>
+      </table>
+      <div class="row-actions"><button type="button" class="secondary small-button" onclick="addGoalRuleRow()">Add goal rule row</button></div>
+
+      <h3>Goal Plan Business Rule</h3>
+      <p class="note">Select all factors that mean a Goal Plan should be used for this service.</p>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" name="goalRule" value="multipleInterventions" /> Multiple interventions are required</label>
+        <label class="checkbox-item"><input type="checkbox" name="goalRule" value="monitoredOverTime" /> Progress will be monitored over time</label>
+        <label class="checkbox-item"><input type="checkbox" name="goalRule" value="changeExpected" /> Behavioural or wellbeing change is expected</label>
+        <label class="checkbox-item"><input type="checkbox" name="goalRule" value="beyondShortIntervention" /> Support extends beyond a short intervention</label>
+        <label class="checkbox-item"><input type="checkbox" name="goalRule" value="multipleProviders" /> Multiple providers or supports are involved</label>
+      </div>
+
+      <h2>3. Outcome Mapping</h2>
+      <p class="section-instruction">Map each service activity or outcome area to immediate, milestone, and sustained outcomes. Do not overcomplicate this. Write what would be visible, recordable, or reported if progress occurred.</p>
+      <div class="definition-box">
+        <h3>Outcome Definitions</h3>
+        <p><strong>Immediate Outcome:</strong> A change, achievement, or result that occurs directly after support. This may happen the same day or within a few contacts.</p>
+        <p><strong>Milestone Outcome:</strong> A meaningful step toward a larger outcome. This shows progress but may not yet be the final result.</p>
+        <p><strong>Sustained Outcome:</strong> A positive outcome maintained over time. This demonstrates longer-term change, stability, or continued engagement.</p>
+      </div>
+      <table>
+        <thead><tr><th>Outcome Area</th><th>Immediate Outcome</th><th>Milestone Outcome</th><th>Sustained Outcome</th></tr></thead>
+        <tbody id="outcomeMappingBody"></tbody>
+      </table>
+      <div class="row-actions"><button type="button" class="secondary small-button" onclick="addOutcomeMappingRow()">Add outcome row</button></div>
+
+      <h2>4. Evidence and Recording</h2>
+      <p class="section-instruction">Identify where the activity and outcome evidence should be recorded. Choose the simplest reliable evidence source. Use "Both" only where an activity template and a Goal Plan are both genuinely required.</p>
+      <table>
+        <thead><tr><th>Activity</th><th>Recording Method</th><th>Evidence Source</th></tr></thead>
+        <tbody id="evidenceBody"></tbody>
+      </table>
+      <div class="row-actions"><button type="button" class="secondary small-button" onclick="addEvidenceRow()">Add evidence row</button></div>
+
+      <h2>5. KPI Framework</h2>
+      <p class="section-instruction">Keep KPIs practical. For each activity, aim for one activity KPI, one outcome KPI, and one sustained KPI. The target should be clear enough to calculate from available data.</p>
+      <div class="definition-box">
+        <h3>KPI Definitions</h3>
+        <p><strong>Activity KPI:</strong> Measures volume of service delivered, such as the number of interventions, sessions, contacts, referrals, or completed activities.</p>
+        <p><strong>Outcome KPI:</strong> Measures whether support achieved the intended immediate or milestone result.</p>
+        <p><strong>Sustained KPI:</strong> Measures whether positive change was maintained after a defined review period.</p>
+      </div>
+      <table>
+        <thead><tr><th>KPI Type</th><th>Measure</th><th>Target</th><th>Review Period</th></tr></thead>
+        <tbody id="kpiBody"></tbody>
+      </table>
+      <div class="row-actions"><button type="button" class="secondary small-button" onclick="addKpiRow()">Add KPI row</button></div>
+
+      <h2>6. Success Definition</h2>
+      <p class="section-instruction">Summarise what success looks like for whānau and for the service. Use language that could help kaimahi understand what they are working toward.</p>
+      <div class="grid">
+        <div><label for="immediateSuccess">Immediate Success</label><textarea id="immediateSuccess" name="immediateSuccess"></textarea></div>
+        <div><label for="milestoneSuccess">Milestone Success</label><textarea id="milestoneSuccess" name="milestoneSuccess"></textarea></div>
+        <div class="full"><label for="sustainedSuccess">Sustained Success</label><textarea id="sustainedSuccess" name="sustainedSuccess"></textarea></div>
+      </div>
+
+      <h2>7. Notes / Risks / Decisions Needed</h2>
+      <p class="section-instruction">Record anything that needs a decision, system change, dashboard rule, activity template, or further discussion with Service Delivery, Quality, Data, or Recordbase support.</p>
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes"></textarea>
+
+      <div class="actions">
+        <button type="button" class="secondary" onclick="window.print()">Print / Save as PDF</button>
+        <button type="reset" class="secondary">Clear Form</button>
+        <button type="button" class="primary" id="submitBtn" onclick="submitForm()">Submit</button>
+      </div>
+    </form>
+  </main>
+
+  <section class="form-container" id="recordsPanel" style="margin-top:24px;">
+    <h1>Submitted Records</h1>
+    <p class="intro">All forms submitted on this device are listed below. Records are stored locally in this browser. Deleting a record requires the admin password.</p>
+    <div class="records-toolbar">
+      <span id="recordsCount" class="note" style="margin:0;"></span>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="secondary small-button" onclick="exportRecords()">Export all (JSON)</button>
+        <button type="button" class="secondary small-button" onclick="renderRecords()">Refresh</button>
+      </div>
+    </div>
+    <div id="recordsList"></div>
+  </section>
+
+  <script>
+    const supportTypes = ['Immediate Need', 'Short Intervention', 'Ongoing Support', 'Goal-Based Support', 'Programme Support', 'Clinical Support', 'Cultural Support'];
+    const goalOptions = ['Yes', 'No', 'Conditional'];
+    const recordingMethods = ['Activity Template','Goal Plan','Outcome Tool','Both - Activity Template and Goal Plan'];
+    const evidenceSources = ['Assessment','Attendance','Clinical Record','Evaluation','Goal Plan Status','Narrative / Pūrākau','Review','Referral Outcome'];
+    const kpiTypes = ['Activity KPI', 'Outcome KPI', 'Sustained KPI'];
+
+    let serviceActivityCount = 0;
+    let goalRuleCount = 0;
+    let outcomeMappingCount = 0;
+    let evidenceCount = 0;
+    let kpiCount = 0;
+
+    function optionList(options, placeholder = 'Select') {
+      return `<option value="">${placeholder}</option>` + options.map(option => `<option>${option}</option>`).join('');
+    }
+
+    function addServiceActivityRow() {
+      serviceActivityCount += 1;
+      document.getElementById('serviceActivitiesBody').insertAdjacentHTML('beforeend', `
+        <tr>
+          <td><input name="activity${serviceActivityCount}" type="text" /></td>
+          <td><textarea name="activityDescription${serviceActivityCount}"></textarea></td>
+          <td><select name="supportType${serviceActivityCount}">${optionList(supportTypes)}</select></td>
+        </tr>`);
+    }
+
+    function addGoalRuleRow() {
+      goalRuleCount += 1;
+      document.getElementById('goalRulesBody').insertAdjacentHTML('beforeend', `
+        <tr>
+          <td><input name="goalActivity${goalRuleCount}" type="text" /></td>
+          <td><select name="goalRequired${goalRuleCount}">${optionList(goalOptions)}</select></td>
+          <td><textarea name="goalCondition${goalRuleCount}" placeholder="Briefly explain when a goal plan is or is not needed."></textarea></td>
+        </tr>`);
+    }
+
+    function addOutcomeMappingRow() {
+      outcomeMappingCount += 1;
+      document.getElementById('outcomeMappingBody').insertAdjacentHTML('beforeend', `
+        <tr>
+          <td><input name="outcomeArea${outcomeMappingCount}" type="text" placeholder="e.g. Housing, Cultural Connection, Wellbeing" /></td>
+          <td><textarea name="immediateOutcome${outcomeMappingCount}"></textarea></td>
+          <td><textarea name="milestoneOutcome${outcomeMappingCount}"></textarea></td>
+          <td><textarea name="sustainedOutcome${outcomeMappingCount}"></textarea></td>
+        </tr>`);
+    }
+
+    function addEvidenceRow() {
+      evidenceCount += 1;
+      document.getElementById('evidenceBody').insertAdjacentHTML('beforeend', `
+        <tr>
+          <td><input name="evidenceActivity${evidenceCount}" type="text" /></td>
+          <td><select name="recordingMethod${evidenceCount}">${optionList(recordingMethods)}</select></td>
+          <td><select name="evidenceSource${evidenceCount}">${optionList(evidenceSources)}</select></td>
+        </tr>`);
+    }
+
+    function addKpiRow(defaultType = '') {
+      kpiCount += 1;
+      const options = optionList(kpiTypes);
+      document.getElementById('kpiBody').insertAdjacentHTML('beforeend', `
+        <tr>
+          <td><select name="kpiType${kpiCount}">${options}</select></td>
+          <td><input name="kpiMeasure${kpiCount}" type="text" placeholder="e.g. % achieving immediate outcome" /></td>
+          <td><input name="kpiTarget${kpiCount}" type="text" placeholder="e.g. 80%" /></td>
+          <td><input name="kpiReview${kpiCount}" type="text" placeholder="e.g. Monthly, 12 weeks, 3 months" /></td>
+        </tr>`);
+      if (defaultType) {
+        document.querySelector(`[name="kpiType${kpiCount}"]`).value = defaultType;
+      }
+    }
+
+    for (let i = 0; i < 3; i += 1) addServiceActivityRow();
+    for (let i = 0; i < 3; i += 1) addGoalRuleRow();
+    for (let i = 0; i < 2; i += 1) addOutcomeMappingRow();
+    for (let i = 0; i < 2; i += 1) addEvidenceRow();
+    addKpiRow('Activity KPI');
+    addKpiRow('Outcome KPI');
+    addKpiRow('Sustained KPI');
+
+    /* ---------- Records: submit, store, render, delete ---------- */
+    const STORAGE_KEY = 'sdMappingRecords';
+    const DELETE_PASSWORD = 'Mahitahi@2026';
+
+    function esc(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+
+    function val(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+
+    function collectRows(bodyId, keys) {
+      const rows = [];
+      document.querySelectorAll('#' + bodyId + ' tr').forEach(function (tr) {
+        const fields = tr.querySelectorAll('input, textarea, select');
+        const obj = {};
+        keys.forEach(function (key, i) { obj[key] = fields[i] ? fields[i].value.trim() : ''; });
+        if (Object.values(obj).some(function (v) { return v !== ''; })) rows.push(obj);
+      });
+      return rows;
+    }
+
+    function loadRecords() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch (e) { return []; }
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function showToast(message) {
+      let toast = document.getElementById('toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(function () { toast.classList.remove('show'); }, 2200);
+    }
+
+    let editingId = null;
+
+    function setValue(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.value = value == null ? '' : value;
+    }
+
+    function rebuildRows(bodyId, addFn, dataRows, keys) {
+      const body = document.getElementById(bodyId);
+      body.innerHTML = '';
+      const rows = (dataRows && dataRows.length) ? dataRows : [];
+      const count = Math.max(rows.length, 1);
+      for (let i = 0; i < count; i += 1) addFn();
+      const trs = body.querySelectorAll('tr');
+      rows.forEach(function (data, idx) {
+        const fields = trs[idx].querySelectorAll('input, textarea, select');
+        keys.forEach(function (key, fi) {
+          if (fields[fi] != null && data[key] != null) fields[fi].value = data[key];
+        });
+      });
+    }
+
+    function submitForm() {
+      const data = {
+        serviceInfo: {
+          serviceName: val('serviceName'),
+          teamProgramme: val('teamProgramme'),
+          serviceManager: val('serviceManager'),
+          targetPopulation: val('targetPopulation'),
+          servicePurpose: val('servicePurpose')
+        },
+        activities: collectRows('serviceActivitiesBody', ['activity', 'description', 'supportType']),
+        goalRules: collectRows('goalRulesBody', ['activity', 'goalRequired', 'condition']),
+        goalRuleFactors: Array.from(document.querySelectorAll('input[name="goalRule"]:checked'))
+          .map(function (c) { return c.parentElement.textContent.trim(); }),
+        outcomes: collectRows('outcomeMappingBody', ['outcomeArea', 'immediate', 'milestone', 'sustained']),
+        evidence: collectRows('evidenceBody', ['activity', 'recordingMethod', 'evidenceSource']),
+        kpis: collectRows('kpiBody', ['type', 'measure', 'target', 'review']),
+        success: {
+          immediate: val('immediateSuccess'),
+          milestone: val('milestoneSuccess'),
+          sustained: val('sustainedSuccess')
+        },
+        notes: val('notes')
+      };
+
+      if (!data.serviceInfo.serviceName) {
+        alert('Please enter a Service Name before submitting.');
+        document.getElementById('serviceName').focus();
+        return;
+      }
+
+      const records = loadRecords();
+
+      if (editingId) {
+        const idx = records.findIndex(function (r) { return r.id === editingId; });
+        if (idx !== -1) {
+          records[idx] = Object.assign({}, records[idx], data, { updatedAt: new Date().toISOString() });
+          showToast('Record updated.');
+        } else {
+          showToast('Original record no longer exists; nothing updated.');
+        }
+        exitEditMode();
+      } else {
+        data.id = 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        data.submittedAt = new Date().toISOString();
+        records.unshift(data);
+        showToast('Record submitted and saved.');
+      }
+
+      saveRecords(records);
+      renderRecords();
+      document.querySelector('form').reset();
+      document.getElementById('recordsPanel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function editRecord(id) {
+      const entered = prompt('Enter the admin password to edit this record:');
+      if (entered === null) return;
+      if (entered !== DELETE_PASSWORD) {
+        alert('Incorrect password. Editing is not allowed.');
+        return;
+      }
+      const record = loadRecords().find(function (r) { return r.id === id; });
+      if (!record) { alert('Record not found.'); return; }
+
+      const si = record.serviceInfo || {};
+      setValue('serviceName', si.serviceName);
+      setValue('teamProgramme', si.teamProgramme);
+      setValue('serviceManager', si.serviceManager);
+      setValue('targetPopulation', si.targetPopulation);
+      setValue('servicePurpose', si.servicePurpose);
+
+      rebuildRows('serviceActivitiesBody', addServiceActivityRow, record.activities, ['activity', 'description', 'supportType']);
+      rebuildRows('goalRulesBody', addGoalRuleRow, record.goalRules, ['activity', 'goalRequired', 'condition']);
+      rebuildRows('outcomeMappingBody', addOutcomeMappingRow, record.outcomes, ['outcomeArea', 'immediate', 'milestone', 'sustained']);
+      rebuildRows('evidenceBody', addEvidenceRow, record.evidence, ['activity', 'recordingMethod', 'evidenceSource']);
+      rebuildRows('kpiBody', addKpiRow, record.kpis, ['type', 'measure', 'target', 'review']);
+
+      const factors = record.goalRuleFactors || [];
+      document.querySelectorAll('input[name="goalRule"]').forEach(function (c) {
+        c.checked = factors.indexOf(c.parentElement.textContent.trim()) !== -1;
+      });
+
+      const success = record.success || {};
+      setValue('immediateSuccess', success.immediate);
+      setValue('milestoneSuccess', success.milestone);
+      setValue('sustainedSuccess', success.sustained);
+      setValue('notes', record.notes);
+
+      editingId = id;
+      document.getElementById('editBannerName').textContent = si.serviceName || 'Unnamed service';
+      document.getElementById('editBanner').style.display = 'flex';
+      document.getElementById('submitBtn').textContent = 'Update record';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function exitEditMode() {
+      editingId = null;
+      document.getElementById('editBanner').style.display = 'none';
+      document.getElementById('submitBtn').textContent = 'Submit';
+    }
+
+    function cancelEdit() {
+      exitEditMode();
+      document.querySelector('form').reset();
+      showToast('Edit cancelled.');
+    }
+
+    function fieldLine(label, value) {
+      if (!value) return '';
+      return '<p class="field-line"><span class="lbl">' + esc(label) + ':</span> ' + esc(value) + '</p>';
+    }
+
+    function recordTable(headers, rows, keys) {
+      if (!rows.length) return '<p class="field-line note" style="margin:0;">None recorded.</p>';
+      let html = '<table><thead><tr>' + headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>';
+      rows.forEach(function (row) {
+        html += '<tr>' + keys.map(function (k) { return '<td>' + esc(row[k]) + '</td>'; }).join('') + '</tr>';
+      });
+      return html + '</tbody></table>';
+    }
+
+    function renderRecords() {
+      const records = loadRecords();
+      const list = document.getElementById('recordsList');
+      const count = document.getElementById('recordsCount');
+      count.textContent = records.length + (records.length === 1 ? ' record stored' : ' records stored');
+
+      if (!records.length) {
+        list.innerHTML = '<div class="empty-records">No records submitted yet.</div>';
+        return;
+      }
+
+      list.innerHTML = records.map(function (r) {
+        const si = r.serviceInfo || {};
+        const submitted = new Date(r.submittedAt).toLocaleString();
+        const updated = r.updatedAt ? ' · Edited ' + new Date(r.updatedAt).toLocaleString() : '';
+        const metaParts = [si.teamProgramme, si.serviceManager].filter(Boolean).join(' · ');
+
+        const body =
+          '<h4>Service Information</h4>' +
+          fieldLine('Service Name', si.serviceName) +
+          fieldLine('Team / Programme', si.teamProgramme) +
+          fieldLine('Service Manager', si.serviceManager) +
+          fieldLine('Target Population', si.targetPopulation) +
+          fieldLine('Primary Service Purpose', si.servicePurpose) +
+
+          '<h4>1. Service Activities</h4>' +
+          recordTable(['Activity', 'Description', 'Support Type'], r.activities || [], ['activity', 'description', 'supportType']) +
+
+          '<h4>2. Goal Planning Rules</h4>' +
+          recordTable(['Activity', 'Goal Plan Required?', 'Reason / Condition'], r.goalRules || [], ['activity', 'goalRequired', 'condition']) +
+          ((r.goalRuleFactors && r.goalRuleFactors.length)
+            ? '<p class="field-line"><span class="lbl">Goal Plan factors:</span> ' + esc(r.goalRuleFactors.join('; ')) + '</p>' : '') +
+
+          '<h4>3. Outcome Mapping</h4>' +
+          recordTable(['Outcome Area', 'Immediate', 'Milestone', 'Sustained'], r.outcomes || [], ['outcomeArea', 'immediate', 'milestone', 'sustained']) +
+
+          '<h4>4. Evidence and Recording</h4>' +
+          recordTable(['Activity', 'Recording Method', 'Evidence Source'], r.evidence || [], ['activity', 'recordingMethod', 'evidenceSource']) +
+
+          '<h4>5. KPI Framework</h4>' +
+          recordTable(['KPI Type', 'Measure', 'Target', 'Review Period'], r.kpis || [], ['type', 'measure', 'target', 'review']) +
+
+          '<h4>6. Success Definition</h4>' +
+          fieldLine('Immediate Success', (r.success || {}).immediate) +
+          fieldLine('Milestone Success', (r.success || {}).milestone) +
+          fieldLine('Sustained Success', (r.success || {}).sustained) +
+
+          '<h4>7. Notes / Risks / Decisions</h4>' +
+          (r.notes ? '<p class="field-line">' + esc(r.notes) + '</p>' : '<p class="field-line note" style="margin:0;">None recorded.</p>');
+
+        return '' +
+          '<div class="record-card" id="' + esc(r.id) + '">' +
+            '<div class="record-head" onclick="toggleRecord(\'' + esc(r.id) + '\')">' +
+              '<div>' +
+                '<div class="record-title">' + esc(si.serviceName || 'Unnamed service') + '</div>' +
+                '<div class="record-meta">' + (metaParts ? esc(metaParts) + ' · ' : '') + 'Submitted ' + esc(submitted) + esc(updated) + '</div>' +
+              '</div>' +
+              '<div class="record-head-actions">' +
+                '<button type="button" class="secondary small-button" onclick="event.stopPropagation(); toggleRecord(\'' + esc(r.id) + '\')">View / hide</button>' +
+                '<button type="button" class="primary small-button" onclick="event.stopPropagation(); editRecord(\'' + esc(r.id) + '\')">Edit</button>' +
+                '<button type="button" class="danger small-button" onclick="event.stopPropagation(); deleteRecord(\'' + esc(r.id) + '\')">Delete</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="record-body">' + body + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function toggleRecord(id) {
+      const card = document.getElementById(id);
+      if (card) card.classList.toggle('open');
+    }
+
+    function deleteRecord(id) {
+      const entered = prompt('Enter the admin password to delete this record:');
+      if (entered === null) return;
+      if (entered !== DELETE_PASSWORD) {
+        alert('Incorrect password. Record was not deleted.');
+        return;
+      }
+      const records = loadRecords().filter(function (r) { return r.id !== id; });
+      saveRecords(records);
+      renderRecords();
+      showToast('Record deleted.');
+    }
+
+    function exportRecords() {
+      const records = loadRecords();
+      if (!records.length) { alert('There are no records to export.'); return; }
+      const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sd-mapping-records-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    renderRecords();
+  </script>
+</body>
+</html>
