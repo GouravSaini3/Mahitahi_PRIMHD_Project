@@ -260,6 +260,39 @@
         .modal-box p { color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
         .modal-close-btn { background: var(--accent); color: white; border: none; padding: 10px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; font-family: inherit; }
 
+        /* SUBMITTED FEEDBACK RECORDS PANEL */
+        .submissions-panel { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 28px; }
+        .submissions-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--light); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+        .submissions-panel-header h3 { font-size: 15px; color: var(--primary); display: flex; align-items: center; gap: 8px; margin: 0; }
+        .submissions-count { background: var(--accent); color: white; border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+        .submission-item { border-bottom: 1px solid var(--border); padding: 16px 20px; transition: background 0.15s; }
+        .submission-item:last-child { border-bottom: none; }
+        .submission-item:hover { background: #f9fbff; }
+        .submission-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .submission-item-meta { font-size: 13px; color: #555; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .submission-item-meta strong { color: var(--primary); font-size: 14px; }
+        .submission-item-meta .date-tag { background: #e8f4fc; color: #2980b9; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .submission-delete-btn { background: #fff0f0; color: var(--danger); border: 1px solid #f5c0c0; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: inherit; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
+        .submission-delete-btn:hover { background: var(--danger); color: white; }
+        .submission-service { margin-bottom: 8px; }
+        .submission-service-name { font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+        .submission-bullet { font-size: 12px; color: #555; padding: 2px 0 2px 14px; position: relative; }
+        .submission-bullet::before { content: '•'; position: absolute; left: 4px; color: var(--accent); }
+        .no-submissions { padding: 36px 20px; text-align: center; color: #aaa; font-size: 14px; font-style: italic; }
+
+        /* PASSWORD CONFIRM MODAL */
+        .pwd-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+        .pwd-modal-overlay.active { display: flex; }
+        .pwd-modal-box { background: white; border-radius: 12px; padding: 28px 32px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+        .pwd-modal-box h4 { color: var(--danger); font-size: 17px; margin-bottom: 8px; }
+        .pwd-modal-box p { color: #555; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+        .pwd-input { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; outline: none; margin-bottom: 8px; transition: border 0.2s; }
+        .pwd-input:focus { border-color: var(--danger); }
+        .pwd-error { color: var(--danger); font-size: 12px; margin-bottom: 12px; min-height: 18px; }
+        .pwd-btn-row { display: flex; gap: 10px; justify-content: center; }
+        .pwd-confirm-btn { background: var(--danger); color: white; border: none; padding: 9px 22px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; }
+        .pwd-cancel-btn { background: #f0f0f0; color: #555; border: none; padding: 9px 22px; border-radius: 6px; cursor: pointer; font-size: 14px; font-family: inherit; }
+
         /* CONTACT & FOOTER */
         .contact-info { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 16px; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); }
         .contact-card { text-align: center; padding: 12px; flex: 1; min-width: 180px; }
@@ -591,142 +624,121 @@
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">AV – Audio Visual</span></td>
                   <td><strong>Services provided over a television or video-conference link.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered by Zoom, Teams, Skype, or video call.</td>
+                  <td class="scenario-col">A worker conducts whanaungatanga or completes a support session with a whaiora using Zoom.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">CM – Community</span></td>
                   <td><strong>Service provided to a tangata whaiora/consumer in a non-hospital setting which is not specifically covered by any of the other definitions.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered out in the community.</td>
+                  <td class="scenario-col">A worker meets a whaiora at a café, park, or community centre for a wellbeing check-in.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">CT – Court</span></td>
                   <td><strong>Services provided in a Court, including when the Court is held at the healthcare agency or Marae eg Mental Health Act Court.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support provided during court-related processes.</td>
+                  <td class="scenario-col">A worker attends court with a whaiora to provide support and advocacy.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">DM – Domiciliary</span></td>
                   <td><strong>Services provided to a tangata whaiora/consumer in the tangata whaiora/consumer's or family/whānau member's home.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Home visits and whānau-based support.</td>
+                  <td class="scenario-col">A worker visits a whaiora at home to discuss recovery goals and wellbeing needs.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">DP – Day tangata whaiora/consumer setting</span></td>
                   <td><strong>Services provided to day tangata whaiora/consumers at a facility delivering day programmes.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Structured daytime programmes or group activities.</td>
+                  <td class="scenario-col">A whaiora attends a daytime wellbeing or recovery programme at the service site.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">ED – Emergency Department</span></td>
                   <td><strong>Services provided in a hospital-based emergency department.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                </tr>
-                <tr>
-                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">ES – Education Sector</span></td>
-                  <td><strong>Educational institution including schools, preschool, kindergarten, school guidance counsellor, special education services.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Crisis or urgent support provided in ED.</td>
+                  <td class="scenario-col">A worker provides mental health support to a whaiora in the emergency department.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">IP – Inpatient</span></td>
                   <td><strong>Services provided in a hospital setting while the tangata whaiora/consumer is an inpatient for mental health and/or addiction.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support provided while admitted to hospital.</td>
+                  <td class="scenario-col">A worker visits a whaiora admitted to an inpatient mental health unit.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">MC – Māori cultural setting</span></td>
                   <td><strong>Services provided in a setting working under kaupapa Māori.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Services delivered within a Māori cultural environment.</td>
+                  <td class="scenario-col">A support session is held at a Marae or kaupapa Māori service setting.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">NP – Non-psychiatric</span></td>
                   <td><strong>Services provided in other parts of hospital.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered in general hospital wards or clinics.</td>
+                  <td class="scenario-col">A worker provides mental health and/or addiction support to a whaiora in a medical ward.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">OM – Other Social Media/E-therapy</span></td>
                   <td><strong>Service provided via electronic media applications excluding text and telephone calls, irrespective of the hardware employed and which is not covered by another code.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered through apps, online chat, or social media.</td>
+                  <td class="scenario-col">A worker checks in with a whaiora through an online chat platform or secure messaging app.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">OS – Onsite</span></td>
                   <td><strong>Services provided in a mental health or alcohol and drug service that is the clinician/staff member's usual place of work, not specifically covered by any of the other definitions.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered at the provider's office or clinic.</td>
+                  <td class="scenario-col">A whaiora attends the service office for a scheduled support appointment.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PC – Primary Care</span></td>
                   <td><strong>Health services for individual tangata whaiora/consumers and family/whānau that have direct access to. eg General Practitioners, practice nurses, school-based health services. They are often a tangata whaiora/consumer's first point of contact with health services.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support provided through GP clinics or primary healthcare services.</td>
+                  <td class="scenario-col">A worker meets at or supports a whaiora to a GP clinic to discuss mental health or addiction concerns.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PH – Telephone</span></td>
                   <td><strong>Contact with a tangata whaiora/consumer via telephone where the intent/context of the call is considered to be of a significant nature. This excludes telephone calls, for example, where the sole intent is to book or remind a tangata whaiora/consumer of a planned appointment.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Meaningful clinical or support phone calls.</td>
+                  <td class="scenario-col">A worker phones a whaiora to complete a wellbeing check and discuss support needs.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PO – Police</span></td>
                   <td><strong>Services provided in a police facility.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                </tr>
-                <tr>
-                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PR – Prison</span></td>
-                  <td><strong>A Prison is a facility which detains people sentenced by the Courts or on remand from the Courts. This does not include Youth Justice Facilities.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered in a police station or custody setting.</td>
+                  <td class="scenario-col">A worker attends the police station to assist a whaiora experiencing distress.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">RE – Residential</span></td>
                   <td><strong>Services provided in a community-based residential rehabilitative mental health or alcohol and drug service.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Support delivered in supported accommodation or residential rehab.</td>
+                  <td class="scenario-col">A whaiora receives daily support while living in a residential recovery programme.</td>
+                  <td><div style="display:flex;flex-direction:column;gap:3px;"><span class="team-pill" style="background:#1a2e45;">Housing &amp; Recovery Intense Rehab</span></div></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">SM – SMS text messaging</span></td>
                   <td><strong>Services provided via SMS cellular communications text messaging. Contact with a tangata whaiora/consumer via SMS where the intent/context of the text is considered to be of a significant nature.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Important support communication through text message.</td>
+                  <td class="scenario-col">A worker sends supportive text messages to check on a whaiora's wellbeing and safety.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 <tr>
                   <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">WR – Written correspondence</span></td>
                   <td><strong>Services provided via letter, fax or email. Written contact with a tangata whaiora/consumer where the intent/context of the contact is considered to be of a significant nature.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                </tr>
-                <tr>
-                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">YJ – Youth Justice Residential Facility</span></td>
-                  <td><strong>Services provided in detention facility (eg Youth Justice facility) not registered as a formal prison. This does not include Police cells where setting code 'PO' should be used.</strong></td>
-                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
-                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="layman-col">Meaningful support communication through email or written documents.</td>
+                  <td class="scenario-col">A clinician emails a wellbeing plan and follow-up information to a whaiora.</td>
+                  <td><span style="color:#16a085;font-weight:600;font-size:12px;"><i class="fas fa-users" style="margin-right:5px;"></i>All Teams</span></td>
                 </tr>
                 </tbody>
             </table>
@@ -1467,6 +1479,18 @@
                 </button>
                 <span id="submit-hint" style="font-size:13px;color:#aaa;font-style:italic;"></span>
             </div>
+
+            <!-- SUBMITTED FEEDBACK RECORDS -->
+            <div class="submissions-panel" id="submissionsPanel">
+                <div class="submissions-panel-header">
+                    <h3><i class="fas fa-inbox" style="color:var(--accent);"></i> Submitted Feedback Records <span class="submissions-count" id="submissionsCount">0</span></h3>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <span style="font-size:12px;color:#888;font-style:italic;"><i class="fas fa-lock" style="color:var(--danger);margin-right:4px;"></i>Delete requires password</span>
+                        <button id="toggleSubBtn" onclick="toggleSubmissionsView()" style="background:var(--accent);color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;"><i class="fas fa-eye"></i> Show Records</button>
+                    </div>
+                </div>
+                <div id="submissionsBody" style="display:none;"></div>
+            </div>
         </div>
     </div>
 
@@ -1477,7 +1501,7 @@
         <div class="contact-card"><h4><i class="fas fa-user-graduate"></i> Advisory</h4><p><strong>Traci-Mae Nathan</strong></p></div>
     </div>
     <div class="footer">
-        <p>PRIMHD T-Code Alignment Project | Data Pack for Julia Aramoana Team | Prepared by Gourav Saini, 2025</p>
+        <p>PRIMHD T-Code Alignment Project | Data Pack for Julia Aramoana Team | Prepared by Gourav Saini, May 2026</p>
         <p>Confidential: For Mahitahi Project Stakeholders Review Only</p>
     </div>
 </div>
@@ -1489,6 +1513,20 @@
         <h3>Submission Sent!</h3>
         <p>Your feedback has been pre-filled into your email client. Please review and send it to <strong><span id="contact-email"></span></strong>. The project team will review your input and follow up as required.</p>
         <button class="modal-close-btn" id="closeModalBtn">Close</button>
+    </div>
+</div>
+
+<!-- PASSWORD CONFIRM MODAL -->
+<div class="pwd-modal-overlay" id="pwdModal">
+    <div class="pwd-modal-box">
+        <h4><i class="fas fa-lock"></i> Delete Confirmation</h4>
+        <p>This record cannot be deleted without authorisation. Please enter the admin password to proceed.</p>
+        <input class="pwd-input" id="pwdInput" placeholder="Enter password…" type="password"/>
+        <div class="pwd-error" id="pwdError"></div>
+        <div class="pwd-btn-row">
+            <button class="pwd-confirm-btn" id="pwdConfirmBtn"><i class="fas fa-trash"></i> Delete</button>
+            <button class="pwd-cancel-btn" id="pwdCancelBtn">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -1738,6 +1776,8 @@ function handleSubmit() {
     var director = nameEl ? nameEl.textContent.trim() : 'Director';
     var date = new Date().toLocaleDateString('en-NZ', { day: '2-digit', month: 'long', year: 'numeric' });
 
+    var submissionData = { director: director, date: date, timestamp: Date.now(), services: [] };
+
     var services = [
         { name: 'Clinical Mental Health',           tcode: 'bul-cmh-tcode',    type: 'bul-cmh-type',    bd: 'bul-cmh-breakdown' },
         { name: 'Housing & Recovery',               tcode: 'bul-hr-tcode',     type: 'bul-hr-type',     bd: 'bul-hr-breakdown' },
@@ -1767,12 +1807,25 @@ function handleSubmit() {
         lines.push(collectBullets('Activity Type (Setting) Comments:', s.type));
         lines.push('');
         lines.push(collectBullets('Breakdown Comments:', s.bd));
+        submissionData.services.push({
+            name: s.name,
+            tcode: getBullets(s.tcode),
+            type: getBullets(s.type),
+            bd: getBullets(s.bd)
+        });
     });
 
     lines.push('');
     lines.push('==============================================');
     lines.push('Submitted via PRIMHD T-Code Alignment Director Data Pack.');
     lines.push('Regards, ' + director);
+
+    try {
+        var existing = JSON.parse(localStorage.getItem('primhd_submissions') || '[]');
+        existing.push(submissionData);
+        localStorage.setItem('primhd_submissions', JSON.stringify(existing));
+        refreshSubmissionsPanel();
+    } catch (e) {}
 
     var em = 'gourav.saini' + String.fromCharCode(64) + 'mahitahi.co.nz';
     var subject = encodeURIComponent('PRIMHD Feedback — ' + director);
@@ -1791,6 +1844,102 @@ function closeModal(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
 }
+
+// ── Submitted Feedback Records ────────────────────────────────────────
+var pendingDeleteIndex = null;
+
+function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function toggleSubmissionsView() {
+    var body = document.getElementById('submissionsBody');
+    var btn = document.getElementById('toggleSubBtn');
+    if (!body) return;
+    var visible = body.style.display !== 'none';
+    body.style.display = visible ? 'none' : 'block';
+    if (btn) btn.innerHTML = visible ? '<i class="fas fa-eye"></i> Show Records' : '<i class="fas fa-eye-slash"></i> Hide Records';
+}
+
+function refreshSubmissionsPanel() {
+    var submissions = [];
+    try { submissions = JSON.parse(localStorage.getItem('primhd_submissions') || '[]'); } catch (e) {}
+    var countEl = document.getElementById('submissionsCount');
+    var bodyEl = document.getElementById('submissionsBody');
+    if (countEl) countEl.textContent = submissions.length;
+    if (!bodyEl) return;
+    if (!submissions.length) {
+        bodyEl.innerHTML = '<div class="no-submissions"><i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#ddd;"></i>No feedback submissions yet. Use the form above to submit your feedback.</div>';
+        return;
+    }
+    var html = '';
+    submissions.forEach(function(sub, idx) {
+        var hasContent = sub.services && sub.services.some(function(s) { return s.tcode.length || s.type.length || s.bd.length; });
+        html += '<div class="submission-item"><div class="submission-item-header"><div class="submission-item-meta"><strong><i class="fas fa-user-tie" style="margin-right:5px;color:var(--accent);"></i>' + escHtml(sub.director) + '</strong><span class="date-tag"><i class="fas fa-calendar-alt" style="margin-right:4px;"></i>' + escHtml(sub.date) + '</span></div><button class="submission-delete-btn" onclick="promptDelete(' + idx + ')"><i class="fas fa-trash"></i> Delete</button></div>';
+        if (hasContent && sub.services) {
+            sub.services.forEach(function(svc) {
+                var svcHasContent = svc.tcode.length || svc.type.length || svc.bd.length;
+                if (!svcHasContent) return;
+                html += '<div class="submission-service"><div class="submission-service-name"><i class="fas fa-circle" style="font-size:7px;color:var(--accent);"></i> ' + escHtml(svc.name) + '</div>';
+                ['tcode', 'type', 'bd'].forEach(function(k) {
+                    if (svc[k].length) {
+                        html += '<div style="font-size:11px;color:#999;font-weight:600;margin:3px 0 2px 14px;text-transform:uppercase;letter-spacing:0.4px;">' + (k === 'tcode' ? 'T-Code Comments' : k === 'type' ? 'Activity Type Comments' : 'Breakdown Comments') + '</div>';
+                        svc[k].forEach(function(b) { html += '<div class="submission-bullet">' + escHtml(b.replace(/^\s*•\s*/, '')) + '</div>'; });
+                    }
+                });
+                html += '</div>';
+            });
+        } else {
+            html += '<div style="font-size:12px;color:#aaa;font-style:italic;padding:4px 0;">No comments were added in this submission.</div>';
+        }
+        html += '</div>';
+    });
+    bodyEl.innerHTML = html;
+}
+
+function promptDelete(idx) {
+    pendingDeleteIndex = idx;
+    var modal = document.getElementById('pwdModal');
+    var input = document.getElementById('pwdInput');
+    var errEl = document.getElementById('pwdError');
+    if (input) input.value = '';
+    if (errEl) errEl.textContent = '';
+    if (modal) modal.classList.add('active');
+    setTimeout(function() { if (input) input.focus(); }, 100);
+}
+
+function confirmDelete() {
+    var input = document.getElementById('pwdInput');
+    var errEl = document.getElementById('pwdError');
+    var pwd = input ? input.value : '';
+    if (pwd !== 'PRIMHD@2026G') {
+        if (errEl) errEl.textContent = 'Incorrect password. Please try again.';
+        if (input) { input.value = ''; input.focus(); }
+        return;
+    }
+    try {
+        var submissions = JSON.parse(localStorage.getItem('primhd_submissions') || '[]');
+        if (pendingDeleteIndex !== null && pendingDeleteIndex >= 0 && pendingDeleteIndex < submissions.length) {
+            submissions.splice(pendingDeleteIndex, 1);
+            localStorage.setItem('primhd_submissions', JSON.stringify(submissions));
+        }
+    } catch (e) {}
+    pendingDeleteIndex = null;
+    var modal = document.getElementById('pwdModal');
+    if (modal) modal.classList.remove('active');
+    refreshSubmissionsPanel();
+}
+
+function cancelDelete() {
+    pendingDeleteIndex = null;
+    var modal = document.getElementById('pwdModal');
+    if (modal) modal.classList.remove('active');
+}
+
+window.toggleSubmissionsView = toggleSubmissionsView;
+window.promptDelete = promptDelete;
+window.confirmDelete = confirmDelete;
+window.cancelDelete = cancelDelete;
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -1851,6 +2000,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modal close
     var closeBtn = document.getElementById('closeModalBtn');
     if (closeBtn) closeBtn.addEventListener('click', function() { closeModal('successModal'); });
+
+    // Password delete modal
+    var pwdConfirm = document.getElementById('pwdConfirmBtn');
+    if (pwdConfirm) pwdConfirm.addEventListener('click', confirmDelete);
+    var pwdCancel = document.getElementById('pwdCancelBtn');
+    if (pwdCancel) pwdCancel.addEventListener('click', cancelDelete);
+    var pwdInput = document.getElementById('pwdInput');
+    if (pwdInput) pwdInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') confirmDelete();
+        if (e.key === 'Escape') cancelDelete();
+    });
+
+    // Load any previously submitted feedback records
+    refreshSubmissionsPanel();
 
     // Editable director name
     var nameEl = document.getElementById('director-name');
