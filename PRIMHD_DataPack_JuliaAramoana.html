@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIMHD T-Code Alignment - Director Data Pack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1a2e45;
+            --accent: #2980b9;
+            --accent2: #16a085;
+            --warn: #e67e22;
+            --danger: #c0392b;
+            --success: #27ae60;
+            --light: #f4f7fa;
+            --border: #dde3ec;
+            --text: #2c3e50;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); color: var(--text); line-height: 1.6; }
+        .container { max-width: 1380px; margin: 0 auto; padding: 20px; }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1a2e45 0%, #2c5282 60%, #2980b9 100%);
+            color: white;
+            padding: 28px 36px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            box-shadow: 0 6px 24px rgba(26,46,69,0.18);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-left h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+        .header-left p { opacity: 0.85; font-size: 14px; }
+        .header-badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 13px;
+            text-align: right;
+        }
+        .header-badge strong { display: block; font-size: 15px; margin-bottom: 2px; }
+
+        /* INFO CARDS */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 18px 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            border-top: 4px solid var(--accent);
+        }
+        .info-card h3 { color: var(--primary); margin-bottom: 12px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .info-card h3 i { color: var(--accent); }
+        .info-card p { margin-bottom: 4px; font-size: 13px; }
+
+        /* SERVICE OVERVIEW */
+        .overview-section {
+            background: white;
+            border-radius: 10px;
+            padding: 22px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .overview-section h2 { font-size: 17px; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 2px solid var(--light); }
+        .overview-section h2 i { color: var(--accent); }
+
+        /* TABS */
+        .tabs-wrapper { background: white; border-radius: 12px; box-shadow: 0 2px 14px rgba(0,0,0,0.09); overflow: hidden; }
+        .tab-nav {
+            display: flex;
+            background: var(--primary);
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 16px 12px;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-bottom: 3px solid transparent;
+            font-family: inherit;
+        }
+        .tab-btn:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.07); }
+        .tab-btn.active {
+            color: white;
+            background: rgba(255,255,255,0.12);
+            border-bottom: 3px solid #41b8f7;
+        }
+        .tab-btn .tab-num {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .tab-btn.active .tab-num { background: #41b8f7; color: var(--primary); }
+
+        .tab-content { display: none; padding: 28px; }
+        .tab-content.active { display: block; }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--primary); color: white; text-align: left; padding: 11px 14px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tr:hover td { background-color: #f0f5fb; }
+        .status-yes { background: #d5f4e6; color: #1e7e4e; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .status-no { background: #fde8e8; color: #c0392b; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .tcode-pill { background: #1a2e45; color: #fff; border-radius: 20px; font-size: 13px; padding: 4px 12px; font-weight: 700; display: inline-block; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .tag-high { background: #d5f4e6; color: #1e7e4e; }
+        .tag-medium { background: #fff4e1; color: #b7770d; }
+        .tag-low { background: #fde8e8; color: #c0392b; }
+
+        /* SECTION HEADERS */
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--light);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .section-head h2 { font-size: 17px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .section-head h2 i { color: var(--accent); }
+        .toggle-btn { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; transition: 0.2s; }
+        .toggle-btn:hover { background: #1f6fa5; }
+
+        .section-divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+        /* RECOMMENDATION PILLS */
+        .pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin: 2px; }
+        .pill-type { background: #dbeafe; color: #1e40af; }
+        .pill-class { background: #fef9c3; color: #854d0e; }
+        .pill-f2f { background: #dcfce7; color: #166534; }
+        .pill-nf2f { background: #f3e8ff; color: #6b21a8; }
+        .pill-container { display: flex; flex-wrap: wrap; gap: 4px; }
+        .count-badge { font-size: 11px; padding: 3px 9px; border-radius: 12px; font-weight: 600; }
+        .type-badge { background: #e8f4fc; color: #2980b9; }
+        .class-badge { background: #fef5e0; color: #d68910; }
+        .bd-badge { background: #e9f7ef; color: #1e8449; }
+
+        /* TEMPLATE CARDS */
+        .team-group { margin-bottom: 14px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .team-group-header { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; background: var(--light); }
+        .team-group-left { display: flex; align-items: center; gap: 10px; }
+        .team-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
+        .team-group-name { font-size: 15px; font-weight: 700; color: var(--primary); }
+        .team-toggle-btn { background: white; border: 1px solid var(--border); color: var(--accent); padding: 5px 13px; border-radius: 5px; cursor: pointer; font-size: 12px; font-family: inherit; transition: 0.2s; }
+        .team-toggle-btn:hover { background: var(--accent); color: white; }
+        .team-templates { padding: 10px 15px 15px; display: flex; flex-direction: column; gap: 10px; }
+        .tmpl-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .tmpl-header { display: flex; justify-content: space-between; align-items: center; padding: 11px 16px; background: #fafbfe; cursor: pointer; user-select: none; transition: background 0.15s; }
+        .tmpl-header:hover { background: #edf3fb; }
+        .tmpl-title { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--primary); font-size: 13px; }
+        .tmpl-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .tmpl-chevron { color: #999; font-size: 12px; transition: transform 0.25s; margin-left: 4px; }
+        .tmpl-chevron.open { transform: rotate(180deg); }
+        .tmpl-body { padding: 15px; background: #fff; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
+        .tmpl-section-label { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .tmpl-section-label i { color: var(--accent); }
+        .nil-label { font-size: 13px; color: #bbb; font-style: italic; }
+        .bd-group-label { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.4px; width: 100%; margin-top: 4px; margin-bottom: 2px; }
+
+        /* FEEDBACK BOX */
+        .feedback-box { background: #f0f8ff; border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 6px; margin-top: 8px; }
+        .feedback-box p { color: #444; font-size: 14px; line-height: 1.7; margin-bottom: 6px; }
+        .feedback-box ul { margin-left: 20px; color: #555; font-size: 14px; line-height: 1.8; }
+        .feedback-box ul li::marker { color: var(--accent); }
+
+        /* CHART */
+        .chart-container { position: relative; height: 290px; margin: 16px 0; }
+
+        /* DIRECTOR ACTION FORM */
+        .action-banner {
+            background: linear-gradient(135deg, #fff8e6, #fffbf0);
+            border: 1px solid #f5d580;
+            border-left: 5px solid var(--warn);
+            border-radius: 10px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .action-banner i { color: var(--warn); font-size: 22px; margin-top: 2px; }
+        .action-banner h3 { color: #7a4f0a; font-size: 15px; margin-bottom: 4px; }
+        .action-banner p { color: #6b4c11; font-size: 13px; }
+
+        .service-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+        .service-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--light);
+            border-bottom: 1px solid var(--border);
+        }
+        .service-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        .service-card-header strong { font-size: 15px; color: var(--primary); }
+        .service-card-body { padding: 18px 20px; }
+
+        .fsb-label { display: block; font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+        .fsb-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 13px; color: #333; outline: none; transition: border 0.2s; font-family: inherit; }
+        .fsb-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(41,128,185,0.12); }
+        .fsb-textarea { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 13px; color: #333; outline: none; resize: vertical; transition: border 0.2s; font-family: inherit; }
+        .fsb-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(41,128,185,0.12); }
+
+        /* Breakdown duration table */
+        .breakdown-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .breakdown-table th { background: #f0f5fb; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; padding: 8px 12px; font-weight: 700; border: 1px solid var(--border); }
+        .breakdown-table td { padding: 8px 12px; border: 1px solid var(--border); font-size: 13px; }
+        .breakdown-table tr:hover td { background: #f9fbff; }
+        .breakdown-input { width: 100%; padding: 5px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; font-family: inherit; text-align: center; }
+        .breakdown-input:focus { border-color: var(--accent); outline: none; }
+        .bd-add-btn { background: var(--accent2); color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-family: inherit; margin-top: 6px; }
+        .bd-add-btn:hover { background: #128c72; }
+
+        .submit-btn { background: var(--success); color: white; border: none; padding: 13px 32px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; font-family: inherit; }
+        .submit-btn:hover { background: #1e9650; }
+
+        /* SCENARIO */
+        .scenario-col { font-style: italic; color: #555; font-size: 12px; }
+        .layman-col { color: #222; }
+        .team-pill { display: inline-block; color: #fff; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin: 2px 0; white-space: nowrap; }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: white; border-radius: 14px; padding: 36px; max-width: 480px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .modal-box i.modal-icon { font-size: 48px; color: var(--success); margin-bottom: 16px; display: block; }
+        .modal-box h3 { font-size: 22px; color: var(--primary); margin-bottom: 10px; }
+        .modal-box p { color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        .modal-close-btn { background: var(--accent); color: white; border: none; padding: 10px 28px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; font-family: inherit; }
+
+        /* CONTACT & FOOTER */
+        .contact-info { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 16px; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); }
+        .contact-card { text-align: center; padding: 12px; flex: 1; min-width: 180px; }
+        .contact-card h4 { color: var(--primary); margin-bottom: 4px; font-size: 14px; }
+        .contact-card p { color: #666; font-size: 13px; }
+        .footer { text-align: center; margin-top: 32px; color: #888; font-size: 13px; padding-top: 18px; border-top: 1px solid var(--border); }
+
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .tab-btn span.tab-label { display: none; }
+            .tab-content { display: none; padding: 16px; }
+            .tab-content.active { display: block; }
+            th, td { padding: 8px 10px; font-size: 12px; }
+            .header { padding: 18px 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <h1><i class="fas fa-project-diagram"></i> PRIMHD T-Code Alignment — Director Data Pack</h1>
+            <p>Service Configuration Review &amp; Approval Package &nbsp;|&nbsp; Te Ahikā – Āhuru</p>
+        </div>
+
+    </div>
+
+    <!-- INFO CARDS -->
+    <div class="info-grid">
+        <div class="info-card">
+            <h3><i class="fas fa-user-tie"></i> Director Information</h3>
+            <p><strong>Director:</strong> <span id="director-name" style="cursor:pointer;text-decoration:underline dotted;" title="Click to edit">Julia Aramoana</span></p>
+            <p><strong>Department:</strong> Integrated Health Services - Supported Living</p>
+            <p><strong>Branch:</strong> Te Ahikā – Āhuru</p>
+        </div>
+        <div class="info-card">
+            <h3><i class="fas fa-users"></i> Management Team</h3>
+            <p><strong>Manager(s):</strong> Kalo Tekii</p>
+            <p><strong>Team Leader(s):</strong> Kylie Porter, Tremain Tauhinu</p>
+            <p><strong>Services Covered:</strong> 5</p>
+        </div>
+        <div class="info-card">
+            <h3><i class="fas fa-chart-line"></i> Project Status</h3>
+            <p><strong>Phase:</strong> 2 &amp; 3 — Director Review &amp; Confirmation</p>
+            <p><strong>Timeline:</strong> Before June 01, 2026</p>
+            <p><strong>Status:</strong> In Progress</p>
+        </div>
+    </div>
+
+    <!-- SERVICE OVERVIEW (always visible) -->
+    <div class="overview-section">
+        <h2><i class="fas fa-clipboard-list"></i> 1. Service Overview</h2>
+        <table>
+            <thead>
+                <tr><th>Service Name</th><th>PRIMHD in CRM?</th><th>Contract Requires PRIMHD?</th><th>Current Team Code</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Clinical Mental Health</td><td><span class="status-yes">Yes</span></td><td><span class="status-yes">Yes</span></td><td>011663</td><td>Is this required as a service in RB? or can we end this service.</td></tr>
+                <tr><td>Housing &amp; Recovery</td><td><span class="status-yes">Yes</span></td><td><span class="status-yes">Yes</span></td><td>015396</td><td> </td></tr>
+                <tr><td>Housing &amp; Recovery Intense Rehab</td><td><span class="status-yes">Yes</span></td><td><span class="status-yes">Yes</span></td><td>011665</td><td></td></tr>
+                <tr><td>Rapua</td><td><span class="status-yes">Yes</span></td><td><span class="status-yes">Yes</span></td><td>016684</td><td></td></tr>
+                
+                <tr><td>Te Paerangi</td><td><span class="status-yes">Yes</span></td><td><span class="status-yes">Yes</span></td><td>016800</td><td></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TABBED SECTIONS -->
+    <div class="tabs-wrapper">
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="tab-recommendations">
+                <span class="tab-num">1</span>
+                <i class="fas fa-check-circle"></i>
+                <span class="tab-label">Recommendations &amp; Feedback</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-current-config">
+                <span class="tab-num">2</span>
+                <i class="fas fa-database"></i>
+                <span class="tab-label">Current Configuration &amp; Utilisation</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-director-action">
+                <span class="tab-num">3</span>
+                <i class="fas fa-clipboard-check"></i>
+                <span class="tab-label">Action Required from Director</span>
+            </button>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- TAB 1: RECOMMENDATIONS & FEEDBACK (Traci-Mae)       -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <div class="tab-content active" id="tab-recommendations">
+
+            <div class="section-head">
+                <h2><i class="fas fa-check-circle"></i> Recommendations &amp; Feedback from Traci-Mae</h2>
+            </div>
+
+            <h3 style="color:var(--primary);margin:0 0 12px 0;font-size:15px;">A. Recommended T-Code (Classification) by Service</h3>
+            <p style="color:#555;font-size:13px;margin-bottom:18px;line-height:1.7;">The table below shows the recommended T-Codes each service should be using, filtered to services under this director only.</p>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:70px;">T-Code</th>
+                  <th style="width:230px;">PRIMHD Definition (Short)</th>
+                  <th style="width:210px;">Layman Use</th>
+                  <th>Working Scenario (Kaupapa Māori Context)</th>
+                  <th style="width:230px;">RB Team Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tcode-pill">T07</span></td>
+                  <td><strong>Therapeutic/structured group session (3+ participants).</strong></td>
+                  <td class="layman-col">Use when running a therapeutic recovery-focused group.</td>
+                  <td class="scenario-col">OT facilitates a DBT skills group for six tangata whaiora focusing on emotional regulation and relapse prevention.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T08</span></td>
+                  <td><strong>Care coordination with external agencies involved in care.</strong></td>
+                  <td class="layman-col">Use when meeting/talking with another service to coordinate care.</td>
+                  <td class="scenario-col">Kapuia attends a case review with CMHT and housing provider to align support plans.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T28</span></td>
+                  <td><strong>Residential bed night with 24-hour awake support.</strong></td>
+                  <td class="layman-col">Use when someone stays overnight in supported housing with awake staff.</td>
+                  <td class="scenario-col">Resident stays overnight in Te Auaunga supported housing with awake night support.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T32</span></td>
+                  <td><strong>Whānau contact without consumer present.</strong></td>
+                  <td class="layman-col">Use when meeting/speaking with whānau only.</td>
+                  <td class="scenario-col">SW meets with service user's mother to discuss relapse triggers (consumer not present).</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T35</span></td>
+                  <td><strong>Did Not Attend pre-arranged appointment.</strong></td>
+                  <td class="layman-col">Use when booked appointment is missed.</td>
+                  <td class="scenario-col">Tangata whaiora does not attend scheduled AOD session and gives no notice.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T36</span></td>
+                  <td><strong>Whānau contact with consumer present.</strong></td>
+                  <td class="layman-col">Use when meeting with whānau and service user together.</td>
+                  <td class="scenario-col">OT meets with tangata whaiora and aunt to review care plan together.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T37</span></td>
+                  <td><strong>Residential leave (absent at midnight).</strong></td>
+                  <td class="layman-col">Use when resident is on leave overnight.</td>
+                  <td class="scenario-col">Resident goes home for weekend and is absent at midnight.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T38</span></td>
+                  <td><strong>Māori cultural intervention only (no clinical).</strong></td>
+                  <td class="layman-col">Use when support is purely cultural.</td>
+                  <td class="scenario-col">Kaumātua provides rongoā and whakapapa kōrero without clinical intervention.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T39</span></td>
+                  <td><strong>Integrated Māori and clinical intervention.</strong></td>
+                  <td class="layman-col">Use when cultural and clinical support occur together.</td>
+                  <td class="scenario-col">RN completes medication review while cultural advisor supports tikanga-based goal setting.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T43</span></td>
+                  <td><strong>Community-based practical/recovery support.</strong></td>
+                  <td class="layman-col">Use when helping someone live well in community.</td>
+                  <td class="scenario-col">Community worker assists with groceries, GP appointment and housing paperwork.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T46</span></td>
+                  <td><strong>Triage/screening to determine urgency or eligibility.</strong></td>
+                  <td class="layman-col">Use when completing intake or referral screening.</td>
+                  <td class="scenario-col">Assessment team completes referral screening to determine service eligibility and urgency.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill">T53</span></td>
+                  <td><strong>Individual assessment/treatment session.</strong></td>
+                  <td class="layman-col">Use for structured 1:1 clinical session.</td>
+                  <td class="scenario-col">AOD practitioner delivers one-on-one relapse prevention session and updates care plan.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="section-divider"></div>
+
+            <!-- Shared service filter -->
+           
+
+
+
+            <h3 style="color:var(--primary);margin:0 0 12px 0;font-size:15px;">B. Recommended Activity Setting (Type) by Service</h3>
+            <p style="color:#555;font-size:13px;margin-bottom:16px;line-height:1.7;">The table below shows the recommended PRIMHD Activity Setting (Type) codes — determining <em>where</em> and <em>how</em> a contact is delivered.</p>
+
+            <table id="type-suggested-table">
+                <thead>
+                    <tr>
+                        <th style="width:190px;">Activity Setting (Type)</th>
+                        <th style="width:230px;">PRIMHD Definition (Short)</th>
+                        <th style="width:200px;">Layman Use</th>
+                        <th>Working Scenario (Kaupapa Māori Context)</th>
+                        <th style="width:230px;">RB Team Name</th>
+                    </tr>
+                </thead>
+                <tbody id="type-sug-body">
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">AV – Audio Visual</span></td>
+                  <td><strong>Services provided over a television or video-conference link.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">CM – Community</span></td>
+                  <td><strong>Service provided to a tangata whaiora/consumer in a non-hospital setting which is not specifically covered by any of the other definitions.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">CT – Court</span></td>
+                  <td><strong>Services provided in a Court, including when the Court is held at the healthcare agency or Marae eg Mental Health Act Court.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">DM – Domiciliary</span></td>
+                  <td><strong>Services provided to a tangata whaiora/consumer in the tangata whaiora/consumer's or family/whānau member's home.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">DP – Day tangata whaiora/consumer setting</span></td>
+                  <td><strong>Services provided to day tangata whaiora/consumers at a facility delivering day programmes.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">ED – Emergency Department</span></td>
+                  <td><strong>Services provided in a hospital-based emergency department.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">ES – Education Sector</span></td>
+                  <td><strong>Educational institution including schools, preschool, kindergarten, school guidance counsellor, special education services.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">IP – Inpatient</span></td>
+                  <td><strong>Services provided in a hospital setting while the tangata whaiora/consumer is an inpatient for mental health and/or addiction.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">MC – Māori cultural setting</span></td>
+                  <td><strong>Services provided in a setting working under kaupapa Māori.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">NP – Non-psychiatric</span></td>
+                  <td><strong>Services provided in other parts of hospital.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">OM – Other Social Media/E-therapy</span></td>
+                  <td><strong>Service provided via electronic media applications excluding text and telephone calls, irrespective of the hardware employed and which is not covered by another code.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">OS – Onsite</span></td>
+                  <td><strong>Services provided in a mental health or alcohol and drug service that is the clinician/staff member's usual place of work, not specifically covered by any of the other definitions.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PC – Primary Care</span></td>
+                  <td><strong>Health services for individual tangata whaiora/consumers and family/whānau that have direct access to. eg General Practitioners, practice nurses, school-based health services. They are often a tangata whaiora/consumer's first point of contact with health services.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PH – Telephone</span></td>
+                  <td><strong>Contact with a tangata whaiora/consumer via telephone where the intent/context of the call is considered to be of a significant nature. This excludes telephone calls, for example, where the sole intent is to book or remind a tangata whaiora/consumer of a planned appointment.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PO – Police</span></td>
+                  <td><strong>Services provided in a police facility.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">PR – Prison</span></td>
+                  <td><strong>A Prison is a facility which detains people sentenced by the Courts or on remand from the Courts. This does not include Youth Justice Facilities.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">RE – Residential</span></td>
+                  <td><strong>Services provided in a community-based residential rehabilitative mental health or alcohol and drug service.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">SM – SMS text messaging</span></td>
+                  <td><strong>Services provided via SMS cellular communications text messaging. Contact with a tangata whaiora/consumer via SMS where the intent/context of the text is considered to be of a significant nature.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">WR – Written correspondence</span></td>
+                  <td><strong>Services provided via letter, fax or email. Written contact with a tangata whaiora/consumer where the intent/context of the contact is considered to be of a significant nature.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tcode-pill" style="background:var(--accent2);font-size:11px;padding:3px 8px;">YJ – Youth Justice Residential Facility</span></td>
+                  <td><strong>Services provided in detention facility (eg Youth Justice facility) not registered as a formal prison. This does not include Police cells where setting code 'PO' should be used.</strong></td>
+                  <td class="layman-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td class="scenario-col"><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                  <td><span style="color:#aaa;font-style:italic;font-size:12px;">— waiting on Traci's input —</span></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="section-divider"></div>
+
+            <h3 style="color:var(--primary);margin:0 0 6px 0;font-size:15px;">C. Recommended Activity Breakdown by Service</h3>
+            <p style="color:#555;font-size:13px;margin-bottom:16px;line-height:1.7;">The table below outlines the recommended Activity Breakdown options — aligned to the suggested list from the PRIMHD project team.</p>
+
+            <table id="bd-suggested-table">
+                <thead>
+                    <tr>
+                        <th style="width:230px;">Activity Breakdown</th>
+                        <th style="width:230px;">Layman Use</th>
+                        <th>Working Scenario (Kaupapa Māori Context)</th>
+                        <th style="width:230px;">RB Team Name</th>
+                    </tr>
+                </thead>
+                <tbody id="bd-sug-body">
+                <tr>
+                  <td style="font-weight:600;">Engagement & Whakawhanaungatanga</td>
+                  <td class="layman-col">Building connection, trust, and ongoing engagement with the tangata whaiora and whānau.</td>
+                  <td class="scenario-col">A kaimahi meets with a new whaiora for coffee to introduce the service, talk about goals, and begin building rapport.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Assessment, Planning & Review</td>
+                  <td class="layman-col">Completing assessments, support plans, risk reviews, or reviewing progress and goals.</td>
+                  <td class="scenario-col">A clinician completes an initial mental health and AOD assessment and updates the person's recovery plan.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Clinical & Health Support</td>
+                  <td class="layman-col">Providing mental health, addiction, medical, or therapeutic support.</td>
+                  <td class="scenario-col">A kaimahi helps a whaiora manage anxiety symptoms and discusses strategies to reduce alcohol use.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Cultural, Spiritual & Holistic Wellbeing</td>
+                  <td class="layman-col">Supporting wellbeing through cultural identity, spirituality, connection, and holistic practices.</td>
+                  <td class="scenario-col">A kaimahi supports a whaiora to reconnect with cultural practices, attend karakia, or explore wellbeing goals.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Social & Practical Support</td>
+                  <td class="layman-col">Helping with day-to-day living needs and practical issues.</td>
+                  <td class="scenario-col">A kaimahi helps a whaiora apply for housing, access food support, or attend a WINZ appointment.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Employment, Education & Vocational Pathways</td>
+                  <td class="layman-col">Supporting pathways into work, study, training, or volunteering.</td>
+                  <td class="scenario-col">A kaimahi helps a whaiora enrol in a training course and prepare a CV for job applications.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Programme Delivery & Participation</td>
+                  <td class="layman-col">Delivering or participating in groups, workshops, or structured programmes.</td>
+                  <td class="scenario-col">A whaiora attends a relapse prevention group, wellbeing workshop, or life skills programme.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Case Coordination & Service Transitions</td>
+                  <td class="layman-col">Coordinating care with other services or supporting transitions between services.</td>
+                  <td class="scenario-col">A clinician works with housing, probation, and GP services to coordinate ongoing support for a whaiora leaving residential treatment.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Whānau & Wider Outcomes</td>
+                  <td class="layman-col">Supporting whānau wellbeing, family involvement, and wider social outcomes.</td>
+                  <td class="scenario-col">A kaimahi meets with whānau to discuss ways they can support the tangata whaiora's recovery journey.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Administration</td>
+                  <td class="layman-col">Recording notes, documentation, reporting, scheduling, or non-direct support tasks.</td>
+                  <td class="scenario-col">A kaimahi writes case notes, updates the care plan, or completes reporting after meeting with a whaiora.</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                    <span class="team-pill" style="background:#3498db;">Housing & Recovery</span>
+                    <span class="team-pill" style="background:#e67e22;">Housing & Recovery Intense Rehab</span>
+                    <span class="team-pill" style="background:#27ae60;">Rapua</span>
+                    <span class="team-pill" style="background:#e74c3c;">Te Paerangi</span>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="section-divider"></div>
+
+            <h3 style="color:var(--primary);margin:0 0 12px 0;font-size:15px;">D. Recommendation on Clinical Mental Health Service</h3>
+            <div class="feedback-box">
+                <p>Recommendation to remove Clinical Mental Health Service and utilise Clinical Template across services:</p>
+                <ul>
+                    <li>We recommend removing the Clinical Mental Health Service, as it is not the most effective way to provide clinical support. Maintaining it as a separate service can result in duplication of referrals, inflated referral counts, and unnecessary administrative work when the same referral needs to be entered from the main service into the Clinical Mental Health Service.</li>
+                    <li>If clinical input is required, we can instead utilise the Clinical Template across all services to provide appropriate and consistent clinical support to Whaiora without creating additional referrals or administrative burden.</li>
+                </ul>
+                <p style="margin-top:10px;">Your feedback will help ensure these updates align with <strong>operational priorities and compliance standards</strong>.</p>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <h3 style="color:var(--primary);margin:0 0 12px 0;font-size:15px;">E. Service Delivery Feedback</h3>
+            <div class="feedback-box">
+                <p>We kindly request your feedback on:</p>
+                <ul>
+                    <li>Any T-Codes you feel should be <strong>added, removed, or adjusted</strong> for your services</li>
+                    <li>Activity types you consider <strong>essential</strong> for each service</li>
+                    <li>Preferred <strong>breakdown options</strong> per engagement type</li>
+                </ul>
+                <p style="margin-top:10px;">Your feedback will help ensure these updates align with <strong>operational priorities and compliance standards</strong>.</p>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <h3 style="color:var(--primary);margin:0 0 12px 0;font-size:15px;">F. Next Steps After Review &amp; Confirmation</h3>
+            <div class="feedback-box">
+                <p>Once we receive review and feedback from Directors and Branch Managers on the shared Data Pack, and confirm the PRIMHD activity codes for their services, we will move forward with proposing a new activity template design.</p>
+                <p style="margin-top:8px;">The proposed advanced activity template will:</p>
+                <ul>
+                    <li>Introduce guided data entry with built-in validation.</li>
+                    <li>Ensure a clear distinction between <strong>Direct Contact and Attempt to Contact</strong> with Whaiora.</li>
+                    <li>Provide context-appropriate field visibility.</li>
+                    <li>Prevent invalid field combinations and minimise incorrect data entry.</li>
+                </ul>
+                <p style="margin-top:8px;">This approach will streamline data capture, improve accuracy, and support consistent reporting across all services.</p>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- TAB 2: CURRENT CONFIGURATION & UTILISATION          -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <div class="tab-content" id="tab-current-config">
+
+            <!-- FILTER BAR -->
+            <div style="background:#f4f7fa;border-radius:8px;padding:12px 18px;margin-bottom:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-left:4px solid var(--accent);">
+                <label style="font-weight:700;color:var(--primary);font-size:14px;display:flex;align-items:center;gap:6px;"><i class="fas fa-filter" style="color:var(--accent);"></i> Filter by Service:</label>
+                <select id="globalServiceFilter"  style="padding:8px 14px;border:2px solid var(--accent);border-radius:6px;background:white;font-size:14px;font-weight:600;color:var(--primary);cursor:pointer;min-width:240px;">
+                    <option value="all">— All Services —</option>
+                    <option value="Clinical Mental Health">Clinical Mental Health</option>
+                    <option value="Housing & Recovery">Housing &amp; Recovery</option>
+                    <option value="Housing & Recovery Intense Rehab">Housing &amp; Recovery Intense Rehab</option>
+                    <option value="Rapua">Rapua</option>
+                    
+                    <option value="Te Paerangi">Te Paerangi</option>
+                </select>
+                <span id="activeBadge" style="background:var(--accent);color:white;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;display:none;"></span>
+                <button id="resetBtn"  style="background:#f8f9fa;border:1px solid var(--border);color:#666;padding:7px 13px;border-radius:6px;cursor:pointer;font-size:12px;display:none;font-family:inherit;">
+                    <i class="fas fa-times"></i> Clear Filter
+                </button>
+                <span style="font-size:11px;color:#888;font-style:italic;">Applies across all sections below</span>
+            </div>
+
+            <!-- 2. Activity Type Codes -->
+            <div class="section-head">
+                <h2><i class="fas fa-code"></i> 2. Current PRIMHD Activity Type Code Configured</h2>
+                <button class="toggle-btn" data-toggle="s2-table"><i class="fas fa-eye"></i> Show/Hide</button>
+            </div>
+            <div id="s2-table">
+            <table>
+                <thead><tr><th>Service Name</th><th>Template</th><th>Type Option</th><th>Description</th><th>Example of Use</th><th>Configured?</th></tr></thead>
+                <tbody id="s2-body">
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>Community</td><td>Service delivered in a general non-hospital community setting.</td><td>Home visits, community centre drop-ins, outreach in public spaces.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>Court</td><td>Service delivered within or related to court settings.</td><td>Attending court with consumer, liaison with court officers.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>Cultural Setting / Mahitahi Office</td><td>Service delivered in a cultural or shared office space.</td><td>Hui at a whānau centre, Mahitahi office-based support.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>Kainga/Home visit</td><td>Face-to-face service delivered at the consumer's home.</td><td>Clinician visits consumer at their home address.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Med Support</td><td>Phone Call</td><td>Service delivered via telephone voice call.</td><td>Follow-up call, welfare check, medication reminder.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Med Support</td><td>Text Message</td><td>Service contact via SMS/text messaging.</td><td>Appointment reminders, brief check-in messages.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Med Support</td><td>Video Call/Zoom</td><td>Service delivered via video conferencing platform.</td><td>Telehealth appointment, whanau hui via Zoom.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Med Support</td><td>Written Correspondence</td><td>Service-related communication delivered in written form.</td><td>Letters, clinical reports, referral documentation.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Goal Review</td><td>Email</td><td>Service contact or correspondence delivered via email.</td><td>Goal review documents sent electronically.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Goal Review</td><td>Maori cultural setting</td><td>Service delivered in a Māori cultural context.</td><td>Goal review conducted at a marae or tikanga-based setting.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Goal Review</td><td>Whanau whare/Home visit</td><td>Service delivered at the consumer's whānau home or residence.</td><td>Goal review visit conducted at consumer's home.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Clinical Mental Health"><td>Clinical Mental Health</td><td>Nil</td><td colspan="3" style="color:#aaa;font-style:italic;">No templates configured — no type options available.</td><td><span class="status-no">No</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>Clinicians Only / Residential Rehab</td><td>Cultural Setting / Mahitahi Office</td><td>Service delivered in a cultural or shared collaborative office setting.</td><td>Whānau hui at Mahitahi site, cultural support sessions.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>Clinicians Only / Residential Rehab</td><td>Text Message</td><td>Service contact via SMS/text messaging.</td><td>Brief welfare message to consumer or whānau.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>Clinicians Only / Residential Rehab</td><td>Written Correspondence</td><td>Service-related communication in written form.</td><td>Letters, reports, discharge summaries.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>Goal Review</td><td>Residential</td><td>Service contact recorded within a residential facility context.</td><td>Goal review conducted within the residential setting.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support / Med Support</td><td>Community</td><td>Service delivered in a non-hospital community environment.</td><td>Community outreach, drop-in support, public settings.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support</td><td>Cultural Setting / Mahitahi Office</td><td>Service delivered in a Māori cultural or Mahitahi collaborative space.</td><td>Cultural support at hui, Mahitahi office visits.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support / Med Support</td><td>Kainga/Home visit</td><td>Service delivered face-to-face at the consumer's home.</td><td>Clinical or support visit at consumer's residence.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support / Med Support</td><td>Phone Call</td><td>Service delivered via telephone voice call.</td><td>Follow-up calls, welfare checks, medication reminders.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support / Med Support</td><td>Text Message</td><td>Service contact via SMS/text messaging.</td><td>Appointment reminders, brief check-in messages.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support / Med Support</td><td>Video Call/Zoom</td><td>Service delivered via synchronous video conferencing.</td><td>Telehealth appointments, remote support sessions.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support / Med Support</td><td>Written Correspondence</td><td>Service communication delivered in written form.</td><td>Letters, clinical reports, referrals.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Goal Review</td><td>Email</td><td>Service contact or documentation sent via email.</td><td>Goal review documents sent electronically.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Goal Review</td><td>Maori cultural setting</td><td>Service delivered in a Māori cultural context or environment.</td><td>Goal review at marae or within tikanga-based setting.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Goal Review</td><td>Whanau whare/Home visit</td><td>Service at the consumer's whānau home or residence.</td><td>Goal review conducted at home.</td><td><span class="status-yes">Yes</span></td></tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support</td><td>Community</td><td>Service delivered in a general non-hospital community setting.</td><td>Community outreach or drop-in support.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support</td><td>Court</td><td>Service delivered within a court context.</td><td>Court attendance or liaison support.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support</td><td>Cultural Setting / Mahitahi Office</td><td>Service in a cultural or Mahitahi collaborative space.</td><td>Hui or cultural support at Mahitahi office.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support / Med Support</td><td>Kainga/Home visit</td><td>Service delivered at the consumer's home.</td><td>Clinical or support home visit.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support / Med Support</td><td>Phone Call</td><td>Service via telephone.</td><td>Follow-up or welfare phone call.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support / Med Support</td><td>Text Message</td><td>Service contact via SMS.</td><td>Appointment reminders, brief check-ins.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support / Med Support</td><td>Video Call/Zoom</td><td>Service via video conferencing.</td><td>Telehealth or remote support session.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Clinicians Only / Community Support / Med Support</td><td>Written Correspondence</td><td>Written service communication.</td><td>Letters, reports, referrals.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Goal Review</td><td>Email</td><td>Service contact or documentation sent via email.</td><td>Goal review sent electronically.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>Goal Review</td><td>Whanau whare/Home visit</td><td>Service at consumer's whānau home.</td><td>Goal review at consumer's home.</td><td><span class="status-yes">Yes</span></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- 2.1 Classification Options -->
+            <div class="section-head">
+                <h2><i class="fas fa-chart-bar"></i> 2.1 Current PRIMHD T-Codes Configured</h2>
+                <button class="toggle-btn" data-toggle="s21-table"><i class="fas fa-eye"></i> Show/Hide</button>
+            </div>
+            <div id="s21-table">
+            <table>
+                <thead><tr><th>Service Name</th><th>Template</th><th>Classification Option</th><th>Description</th><th>Example of Use</th><th>Configured?</th></tr></thead>
+                <tbody id="s21-body">
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only</td><td>T44 - Advocacy</td><td>Activities where staff act on behalf of or alongside the consumer to access rights, services, or entitlements.</td><td>Assisting consumer to access housing rights, benefit entitlements, or legal support.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Goal Review / Med Support</td><td>T08 - Care/liaison coordination</td><td>Coordination and liaison activities with other services, agencies, or supports involved in the consumer's care plan.</td><td>Coordinating with GP, housing provider, or social services on behalf of consumer.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Goal Review / Med Support</td><td>T43 - Community Support contacts</td><td>Contacts delivered as part of community support services, including non-clinical support.</td><td>Community worker accompanying consumer to appointments or providing practical support.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Goal Review / Med Support</td><td>T32 - Contact with family/whānau, consumer not present</td><td>Service contact with family or whānau where the consumer is not present during the interaction.</td><td>Phone call to whānau member to discuss care plan while consumer is unavailable.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only</td><td>T15 - Court liaison attendances</td><td>Attendance or activity related to court liaison functions and consumer support in legal settings.</td><td>Clinician attends court with consumer for mental health-related hearing.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Goal Review / Med Support</td><td>T35 - Did not attend</td><td>Scheduled appointment or activity where the consumer Did Not Attend (DNA).</td><td>Consumer did not arrive for planned home visit or clinic appointment.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Goal Review / Med Support</td><td>T53 - Individual treatment attendance</td><td>Attendance at an individual treatment or therapy session with a clinician or support worker.</td><td>One-on-one counselling, clinical assessment, or medication review session.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Goal Review</td><td>T39 - Integrated Māori and clinical interventions</td><td>Interventions that blend Māori models of care with clinical practice in a combined approach.</td><td>Combining tikanga-based support with clinical treatment during a session.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>T38 - Māori specific interventions only</td><td>Interventions delivered exclusively within a Māori model of care context, without clinical overlay.</td><td>Karakia, wānanga, or rongoā Māori sessions delivered by Māori health worker.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support / Med Support</td><td>T01 - Mental health crisis attendances</td><td>Attendances related to acute or crisis mental health presentations.</td><td>Crisis response visit or emergency support for consumer in acute distress.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>T47 - Support for whānau</td><td>Support services and interventions provided directly for whānau/family members of the consumer.</td><td>Psychoeducation session with whānau about consumer's diagnosis and care.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td>Clinicians Only / Community Support</td><td>T24 - Work opportunity/Employment/Vocational</td><td>Activities related to employment, vocational training, or supported work opportunities.</td><td>Supporting consumer to access work placement, CV preparation, or job training.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Clinical Mental Health"><td>Clinical Mental Health</td><td>Nil</td><td colspan="3" style="color:#aaa;font-style:italic;">No templates configured — no classification options available.</td><td><span class="status-no">No</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>All Templates</td><td>T32 - Contact with family/whānau, consumer not present</td><td>Service contact with family or whānau where the consumer is not present.</td><td>Update call to whānau while consumer is in residential facility.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>All Templates</td><td>T37 - On leave</td><td>Consumer is recorded as on leave from the residential or inpatient service setting.</td><td>Consumer has taken approved leave from the residential rehabilitation facility.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td>All Templates</td><td>T28 - Residential facility with awake night support</td><td>Contact or bed night within a residential facility that provides awake overnight staffing.</td><td>Overnight support by awake staff within IRR residential setting.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>Clinical Only / Community Support</td><td>T44 - Advocacy</td><td>Activities where staff advocate on behalf of or alongside the consumer.</td><td>Assisting consumer to navigate housing, legal, or benefit systems.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>All Templates</td><td>T08 - Care/liaison coordination</td><td>Coordination and liaison with other services involved in the consumer's care.</td><td>Coordinating with GP, WINZ, or housing provider.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>All Templates</td><td>T43 - Community Support contacts</td><td>Contacts delivered as part of community support services.</td><td>Community support worker providing practical or social support.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>All Templates</td><td>T32 - Contact with family/whānau, consumer not present</td><td>Service contact with whānau without the consumer present.</td><td>Whānau call or visit to discuss progress without consumer present.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>All Templates</td><td>T35 - Did not attend</td><td>Scheduled appointment where the consumer Did Not Attend.</td><td>Consumer missed their planned home visit.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>All Templates</td><td>T53 - Individual treatment attendance</td><td>Attendance at an individual treatment or therapy session.</td><td>One-on-one clinical or support session.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td>All Templates</td><td>T45 - Peer support</td><td>Contact with a consumer for the primary purpose of providing Peer Support.</td><td>Peer support kaimahi accompanies tangata whaiora to a community activity.</td><td><span class="status-yes">Yes</span></td></tr>
+                    
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>All Templates</td><td>T08 - Care/liaison coordination</td><td>Coordination and liaison with other services.</td><td>Coordinating with GP or social services.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>All Templates</td><td>T43 - Community Support contacts</td><td>Contacts delivered as part of community support services.</td><td>Community support in a non-clinical capacity.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>All Templates</td><td>T53 - Individual treatment attendance</td><td>Attendance at an individual treatment or therapy session.</td><td>One-on-one clinical session.</td><td><span class="status-yes">Yes</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td>All Templates</td><td>T02 - Treatment - Individual</td><td>Individual treatment session (legacy).</td><td>Legacy individual treatment session.</td><td><span class="status-yes">Yes</span></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- 2.2 Template Configuration -->
+            <div class="section-head">
+                <h2><i class="fas fa-layer-group"></i> 2.2 Template Configuration (Activity Settings in Recordbase)</h2>
+                <div style="display:flex;gap:8px;">
+                    <button class="toggle-btn" id="expandAllBtn"><i class="fas fa-expand-alt"></i> Expand All</button>
+                    <button class="toggle-btn" id="collapseAllBtn" style="background:#6c757d;"><i class="fas fa-compress-alt"></i> Collapse All</button>
+                </div>
+            </div>
+            <p style="color:#666;font-size:13px;margin-bottom:18px;">Current template configurations showing Activity Types, Classification Options, and Breakdown Options set up in Recordbase for each service.</p>
+            <div id="template-config-container">
+
+                <!-- Housing & Recovery -->
+                <div class="team-group" data-service="Housing &amp; Recovery">
+                    <div class="team-group-header">
+                        <div class="team-group-left">
+                            <span class="team-dot" style="background:#3498db;"></span>
+                            <div><div class="team-group-name">Housing &amp; Recovery</div><div style="font-size:12px;color:#888;">Team Code: 015396</div></div>
+                        </div>
+                        <button class="team-toggle-btn" data-team="housing-recovery">Show/Hide Templates</button>
+                    </div>
+                    <div class="team-templates" id="team-housing-recovery" style="display:none;">
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="hr-t1"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Clinicians Only</span></div><div class="tmpl-meta"><span class="count-badge type-badge">9 Types</span><span class="count-badge class-badge">14 Classifications</span><span class="count-badge bd-badge">14 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-hr-t1"></i></div></div><div class="tmpl-body" id="hr-t1" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Court</span><span class="pill pill-type">Cultural Setting / Mahitahi Office</span><span class="pill pill-type">Inpatient</span><span class="pill pill-type">Kainga/Home visit</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T44 - Advocacy</span><span class="pill pill-class">T08 - Care/liaison coordination</span><span class="pill pill-class">T43 - Community Support contacts</span><span class="pill pill-class">T32 - Contact with family/whānau, not present</span><span class="pill pill-class">T15 - Court liaison</span><span class="pill pill-class">T35 - Did not attend</span><span class="pill pill-class">T53 - Individual treatment attendance</span><span class="pill pill-class">T39 - Integrated Māori &amp; clinical</span><span class="pill pill-class">T38 - Māori specific only</span><span class="pill pill-class">T01 - Mental health crisis</span><span class="pill pill-class">T49 - Support Children of Parents</span><span class="pill pill-class">T50 - Support for Parents</span><span class="pill pill-class">T47 - Support for whānau</span><span class="pill pill-class">T24 - Work/Employment/Vocational</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><div class="bd-group-label">Face-to-Face</div><span class="pill pill-f2f">F2F - Clinical Hui</span><span class="pill pill-f2f">F2F - Cultural Support</span><span class="pill pill-f2f">F2F - T35 - Did not attend</span><span class="pill pill-f2f">F2F - Exit Evaluation</span><span class="pill pill-f2f">F2F - Goal Related Activity</span><span class="pill pill-f2f">F2F - GP Visit</span><span class="pill pill-f2f">F2F - Immediate Support</span><span class="pill pill-f2f">F2F - Whanau Hui</span><div class="bd-group-label">Non F2F</div><span class="pill pill-nf2f">Non F2F - Administration Tasks</span><span class="pill pill-nf2f">Non F2F - Clinical Liaison</span><span class="pill pill-nf2f">Non F2F - Cold Call</span><span class="pill pill-nf2f">Non F2F - Community Networking</span><span class="pill pill-nf2f">Non F2F - Whaiora Contact</span><span class="pill pill-nf2f">Non F2F - Whanau Contact</span></div></div></div></div>
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="hr-t2"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Community Support</span></div><div class="tmpl-meta"><span class="count-badge type-badge">8 Types</span><span class="count-badge class-badge">12 Classifications</span><span class="count-badge bd-badge">18 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-hr-t2"></i></div></div><div class="tmpl-body" id="hr-t2" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Court</span><span class="pill pill-type">Cultural Setting / Mahitahi Office</span><span class="pill pill-type">Kainga/Home visit</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T08</span><span class="pill pill-class">T43</span><span class="pill pill-class">T32</span><span class="pill pill-class">T35</span><span class="pill pill-class">T53</span><span class="pill pill-class">T38</span><span class="pill pill-class">T01</span><span class="pill pill-class">T41</span><span class="pill pill-class">T40</span><span class="pill pill-class">T45</span><span class="pill pill-class">T47</span><span class="pill pill-class">T24</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><div class="bd-group-label">Face-to-Face</div><span class="pill pill-f2f">F2F - Clinical Hui</span><span class="pill pill-f2f">F2F - Cultural Support</span><span class="pill pill-f2f">F2F - T35 DNA</span><span class="pill pill-f2f">F2F - Exit Evaluation</span><span class="pill pill-f2f">F2F - Goal Related Activity</span><span class="pill pill-f2f">F2F - GP Visit</span><span class="pill pill-f2f">F2F - Immediate Support</span><span class="pill pill-f2f">F2F - On Call Support</span><span class="pill pill-f2f">F2F - TOPs Only - Cultural Intervention</span><span class="pill pill-f2f">F2F - Whanau Hui</span><span class="pill pill-f2f">F2F - Whanau Whanui Evaluation</span><span class="pill pill-f2f">F2F - Whanaungatanga</span><div class="bd-group-label">Non F2F</div><span class="pill pill-nf2f">Non F2F - Administration Tasks</span><span class="pill pill-nf2f">Non F2F - Clinical Liaison</span><span class="pill pill-nf2f">Non F2F - Cold Call</span><span class="pill pill-nf2f">Non F2F - Community Networking</span><span class="pill pill-nf2f">Non F2F - Whaiora Contact</span><span class="pill pill-nf2f">Non F2F - Whanau Contact</span></div></div></div></div>
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="hr-t3"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Goal Review</span></div><div class="tmpl-meta"><span class="count-badge type-badge">8 Types</span><span class="count-badge class-badge">10 Classifications</span><span class="count-badge bd-badge">6 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-hr-t3"></i></div></div><div class="tmpl-body" id="hr-t3" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Email</span><span class="pill pill-type">Māori cultural setting</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Whanau whare/Home visit</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T08</span><span class="pill pill-class">T43</span><span class="pill pill-class">T32</span><span class="pill pill-class">T35</span><span class="pill pill-class">T53</span><span class="pill pill-class">T39</span><span class="pill pill-class">T01</span><span class="pill pill-class">T41</span><span class="pill pill-class">T40</span><span class="pill pill-class">T45</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><div class="bd-group-label">Face-to-Face</div><span class="pill pill-f2f">F2F - 12 Week Goal Review</span><span class="pill pill-f2f">F2F - 6 Week Goal Review</span><span class="pill pill-f2f">F2F - T35 DNA</span><span class="pill pill-f2f">F2F - Exit Evaluation</span><span class="pill pill-f2f">F2F - Whanau Whanui Evaluation</span><div class="bd-group-label">Non F2F</div><span class="pill pill-nf2f">Non F2F - Administration Tasks</span></div></div></div></div>
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="hr-t4"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Med Support</span></div><div class="tmpl-meta"><span class="count-badge type-badge">6 Types</span><span class="count-badge class-badge">6 Classifications</span><span class="count-badge bd-badge" style="background:#fde8e8;color:#c0392b;">⚠ 0 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-hr-t4"></i></div></div><div class="tmpl-body" id="hr-t4" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Kainga/Home visit</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T08</span><span class="pill pill-class">T43</span><span class="pill pill-class">T32</span><span class="pill pill-class">T35</span><span class="pill pill-class">T53</span><span class="pill pill-class">T01</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><span class="nil-label">⚠ No breakdown options configured — director action required.</span></div></div></div></div>
+                    </div>
+                </div>
+
+                <!-- H&R Intense Rehab -->
+                <div class="team-group" data-service="Housing &amp; Recovery Intense Rehab">
+                    <div class="team-group-header">
+                        <div class="team-group-left">
+                            <span class="team-dot" style="background:#e67e22;"></span>
+                            <div><div class="team-group-name">Housing &amp; Recovery Intense Rehab</div><div style="font-size:12px;color:#888;">Team Code: 011665</div></div>
+                        </div>
+                        <button class="team-toggle-btn" data-team="hrr">Show/Hide Templates</button>
+                    </div>
+                    <div class="team-templates" id="team-hrr" style="display:none;">
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="hrr-t1"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Residential Rehab</span></div><div class="tmpl-meta"><span class="count-badge type-badge">5 Types</span><span class="count-badge class-badge">3 Classifications</span><span class="count-badge bd-badge">4 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-hrr-t1"></i></div></div><div class="tmpl-body" id="hrr-t1" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Cultural Setting / Mahitahi Office</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Residential</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T32</span><span class="pill pill-class">T37 - On leave</span><span class="pill pill-class">T28 - Residential with awake night</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><span class="pill pill-f2f">F2F - Clinical Hui</span><span class="pill pill-f2f">F2F - Cultural Support</span><span class="pill pill-nf2f">Non F2F - Administration</span><span class="pill pill-nf2f">Non F2F - Clinical Liaison</span></div></div></div></div>
+                    </div>
+                </div>
+
+                <!-- Rapua -->
+                <div class="team-group" data-service="Rapua">
+                    <div class="team-group-header">
+                        <div class="team-group-left">
+                            <span class="team-dot" style="background:#27ae60;"></span>
+                            <div><div class="team-group-name">Rapua</div><div style="font-size:12px;color:#888;">Team Code: 016684</div></div>
+                        </div>
+                        <button class="team-toggle-btn" data-team="rapua">Show/Hide Templates</button>
+                    </div>
+                    <div class="team-templates" id="team-rapua" style="display:none;">
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="rapua-t1"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Community Support</span></div><div class="tmpl-meta"><span class="count-badge type-badge">8 Types</span><span class="count-badge class-badge">12 Classifications</span><span class="count-badge bd-badge">16 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-rapua-t1"></i></div></div><div class="tmpl-body" id="rapua-t1" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Cultural Setting / Mahitahi Office</span><span class="pill pill-type">Kainga/Home visit</span><span class="pill pill-type">Other Social Media/E-therapy</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T44</span><span class="pill pill-class">T08</span><span class="pill pill-class">T43</span><span class="pill pill-class">T32</span><span class="pill pill-class">T35</span><span class="pill pill-class">T53</span><span class="pill pill-class">T38</span><span class="pill pill-class">T01</span><span class="pill pill-class">T41</span><span class="pill pill-class">T40</span><span class="pill pill-class">T45</span><span class="pill pill-class">T47</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><div class="bd-group-label">Face-to-Face</div><span class="pill pill-f2f">F2F - Clinical Hui</span><span class="pill pill-f2f">F2F - Cultural Support</span><span class="pill pill-f2f">F2F - DNA</span><span class="pill pill-f2f">F2F - Exit Evaluation</span><span class="pill pill-f2f">F2F - Goal Activity</span><span class="pill pill-f2f">F2F - GP Visit</span><span class="pill pill-f2f">F2F - Immediate Support</span><span class="pill pill-f2f">F2F - On Call Support</span><span class="pill pill-f2f">F2F - Whanau Hui</span><span class="pill pill-f2f">F2F - Whanaungatanga</span><div class="bd-group-label">Non F2F</div><span class="pill pill-nf2f">Non F2F - Administration Tasks</span><span class="pill pill-nf2f">Non F2F - Clinical Liaison</span><span class="pill pill-nf2f">Non F2F - Cold Call</span><span class="pill pill-nf2f">Non F2F - Community Networking</span><span class="pill pill-nf2f">Non F2F - Whaiora Contact</span><span class="pill pill-nf2f">Non F2F - Whanau Contact</span></div></div></div></div>
+                    </div>
+                </div>
+
+                <!-- Te Paerangi -->
+                <div class="team-group" data-service="Te Paerangi">
+                    <div class="team-group-header">
+                        <div class="team-group-left">
+                            <span class="team-dot" style="background:#e74c3c;"></span>
+                            <div><div class="team-group-name">Te Paerangi</div><div style="font-size:12px;color:#888;">Team Code: 016800</div></div>
+                        </div>
+                        <button class="team-toggle-btn" data-team="tp">Show/Hide Templates</button>
+                    </div>
+                    <div class="team-templates" id="team-tp" style="display:none;">
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="tp-t1"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Clinicians Only</span></div><div class="tmpl-meta"><span class="count-badge type-badge">8 Types</span><span class="count-badge class-badge">10 Classifications</span><span class="count-badge bd-badge">12 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-tp-t1"></i></div></div><div class="tmpl-body" id="tp-t1" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Court</span><span class="pill pill-type">Cultural Setting / Mahitahi Office</span><span class="pill pill-type">Kainga/Home visit</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T08</span><span class="pill pill-class">T43</span><span class="pill pill-class">T32</span><span class="pill pill-class">T35</span><span class="pill pill-class">T53</span><span class="pill pill-class">T39</span><span class="pill pill-class">T38</span><span class="pill pill-class">T01</span><span class="pill pill-class">T45</span><span class="pill pill-class">T47</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><div class="bd-group-label">Face-to-Face</div><span class="pill pill-f2f">F2F - Clinical Hui</span><span class="pill pill-f2f">F2F - Cultural Support</span><span class="pill pill-f2f">F2F - DNA</span><span class="pill pill-f2f">F2F - Exit Evaluation</span><span class="pill pill-f2f">F2F - Goal Activity</span><span class="pill pill-f2f">F2F - Whanau Hui</span><span class="pill pill-f2f">F2F - Whanaungatanga</span><div class="bd-group-label">Non F2F</div><span class="pill pill-nf2f">Non F2F - Administration</span><span class="pill pill-nf2f">Non F2F - Clinical Liaison</span><span class="pill pill-nf2f">Non F2F - Cold Call</span><span class="pill pill-nf2f">Non F2F - Whaiora Contact</span><span class="pill pill-nf2f">Non F2F - Whanau Contact</span></div></div></div></div>
+                        <div class="tmpl-card"><div class="tmpl-header" data-tmpl="tp-t2"><div class="tmpl-title"><i class="fas fa-file-alt" style="color:var(--accent);"></i><span>Community Support</span></div><div class="tmpl-meta"><span class="count-badge type-badge">8 Types</span><span class="count-badge class-badge">10 Classifications</span><span class="count-badge bd-badge">12 Breakdowns</span><i class="fas fa-chevron-down tmpl-chevron" id="chev-tp-t2"></i></div></div><div class="tmpl-body" id="tp-t2" style="display:none;"><div><div class="tmpl-section-label"><i class="fas fa-map-marker-alt"></i> Type Options</div><div class="pill-container"><span class="pill pill-type">Community</span><span class="pill pill-type">Court</span><span class="pill pill-type">Cultural Setting / Mahitahi Office</span><span class="pill pill-type">Kainga/Home visit</span><span class="pill pill-type">Phone Call</span><span class="pill pill-type">Text Message</span><span class="pill pill-type">Video Call/Zoom</span><span class="pill pill-type">Written Correspondence</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-tags"></i> Classification Options</div><div class="pill-container"><span class="pill pill-class">T08</span><span class="pill pill-class">T43</span><span class="pill pill-class">T32</span><span class="pill pill-class">T35</span><span class="pill pill-class">T53</span><span class="pill pill-class">T38</span><span class="pill pill-class">T01</span><span class="pill pill-class">T41</span><span class="pill pill-class">T40</span><span class="pill pill-class">T45</span></div></div><div><div class="tmpl-section-label"><i class="fas fa-list-ul"></i> Breakdown Options</div><div class="pill-container"><div class="bd-group-label">Face-to-Face</div><span class="pill pill-f2f">F2F - Clinical Hui</span><span class="pill pill-f2f">F2F - Cultural Support</span><span class="pill pill-f2f">F2F - DNA</span><span class="pill pill-f2f">F2F - Exit Evaluation</span><span class="pill pill-f2f">F2F - Goal Activity</span><span class="pill pill-f2f">F2F - Whanau Hui</span><div class="bd-group-label">Non F2F</div><span class="pill pill-nf2f">Non F2F - Administration</span><span class="pill pill-nf2f">Non F2F - Clinical Liaison</span><span class="pill pill-nf2f">Non F2F - Cold Call</span><span class="pill pill-nf2f">Non F2F - Whaiora Contact</span><span class="pill pill-nf2f">Non F2F - Whanau Contact</span></div></div></div></div>
+                    </div>
+                </div>
+
+                <!-- Clinical Mental Health -->
+                <div class="team-group" data-service="Clinical Mental Health">
+                    <div class="team-group-header">
+                        <div class="team-group-left">
+                            <span class="team-dot" style="background:#95a5a6;"></span>
+                            <div><div class="team-group-name">Clinical Mental Health</div><div style="font-size:12px;color:#888;">Team Code: 011663</div></div>
+                        </div>
+                    </div>
+                    <div style="padding:16px 20px;color:#aaa;font-style:italic;font-size:13px;text-align:center;">No templates configured for this service.</div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- T-Code Utilisation Chart -->
+            <div class="section-head">
+                <h2><i class="fas fa-chart-bar"></i> 3. T-Code Utilisation (July 1, 2024 – April 30, 2026)</h2>
+                <button class="toggle-btn" id="toggleChartBtn"><i class="fas fa-chart-bar"></i> Show/Hide Chart</button>
+            </div>
+            <p style="color:#666;font-size:13px;margin-bottom:14px;"><i class="fas fa-info-circle" style="color:var(--accent);"></i> Source: TCode Utilisation Report — Period 01/07/2024 to 30/04/2026. Only services under this director are shown.</p>
+            <div class="chart-container"><canvas id="usageChart"></canvas></div>
+            <table style="margin-top:18px;">
+                <thead><tr><th>Service Name</th><th>T-Code</th><th>T-Code Definition</th><th>Activity Count</th><th>Usage Level</th></tr></thead>
+                <tbody id="s3-body">
+                    <!-- Clinical Mental Health -->
+                    <tr data-service="Clinical Mental Health"><td>Clinical Mental Health</td><td><span class="tcode-pill">T43</span></td><td>Community Support contacts</td><td>17</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Clinical Mental Health"><td>Clinical Mental Health</td><td><span class="tcode-pill">T53</span></td><td>Individual treatment attendance</td><td>1</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <!-- Housing & Recovery -->
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T43</span></td><td>Community Support contacts</td><td>13,649</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T53</span></td><td>Individual treatment attendance</td><td>7,838</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T08</span></td><td>Care/liaison coordination</td><td>1,354</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T35</span></td><td>Did not attend</td><td>620</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T39</span></td><td>Integrated Māori and clinical interventions</td><td>205</td><td><span class="tag tag-low">Medium to Low</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T44</span></td><td>Advocacy</td><td>22</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T47</span></td><td>Support for whānau</td><td>9</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T38</span></td><td>Māori specific interventions only</td><td>4</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T32</span></td><td>Contact with family/whānau, consumer not present</td><td>13</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T15</span></td><td>Court liaison attendances</td><td>2</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery"><td>Housing &amp; Recovery</td><td><span class="tcode-pill">T01</span></td><td>Mental health crisis attendances</td><td>3</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <!-- Housing & Recovery Intense Rehab -->
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td><span class="tcode-pill">T28</span></td><td>Residential facility with awake night support</td><td>5,131</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Housing &amp; Recovery Intense Rehab"><td>Housing &amp; Recovery Intense Rehab</td><td><span class="tcode-pill">T37</span></td><td>On leave</td><td>370</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <!-- Rapua -->
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T43</span></td><td>Community Support contacts</td><td>5,374</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T53</span></td><td>Individual treatment attendance</td><td>2,296</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T35</span></td><td>Did not attend</td><td>1,224</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T45</span></td><td>Peer support</td><td>859</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T08</span></td><td>Care/liaison coordination</td><td>728</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T44</span></td><td>Advocacy</td><td>35</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T39</span></td><td>Integrated Māori and clinical interventions</td><td>28</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T41</span></td><td>Other cultural specific activity</td><td>20</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T46</span></td><td>Triage and/or Screening</td><td>14</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T47</span></td><td>Support for whānau</td><td>6</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T32</span></td><td>Contact with family/whānau, consumer not present</td><td>3</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T40</span></td><td>Pacific peoples cultural activity</td><td>2</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T24</span></td><td>Work opportunity/Employment/Vocational</td><td>3</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T15</span></td><td>Court liaison attendances</td><td>1</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Rapua"><td>Rapua</td><td><span class="tcode-pill">T01</span></td><td>Mental health crisis attendances</td><td>1</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    
+                    
+                    
+                    
+                    
+                    <!-- Te Paerangi -->
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T43</span></td><td>Community Support contacts</td><td>4,211</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T08</span></td><td>Care/liaison coordination</td><td>3,168</td><td><span class="tag tag-high">High</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T53</span></td><td>Individual treatment attendance</td><td>698</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T35</span></td><td>Did not attend</td><td>473</td><td><span class="tag tag-medium">Medium</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T47</span></td><td>Support for whānau</td><td>197</td><td><span class="tag tag-low">Medium to Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T45</span></td><td>Peer support</td><td>130</td><td><span class="tag tag-low">Medium to Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T39</span></td><td>Integrated Māori and clinical interventions</td><td>38</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T41</span></td><td>Other cultural specific activity</td><td>35</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T32</span></td><td>Contact with family/whānau, consumer not present</td><td>32</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T38</span></td><td>Māori specific interventions only</td><td>19</td><td><span class="tag tag-low">Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T46</span></td><td>Triage and/or Screening</td><td>6</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T44</span></td><td>Advocacy</td><td>12</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T15</span></td><td>Court liaison attendances</td><td>10</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                    <tr data-service="Te Paerangi"><td>Te Paerangi</td><td><span class="tcode-pill">T01</span></td><td>Mental health crisis attendances</td><td>10</td><td><span class="tag tag-low">Very Low</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- TAB 3: ACTION REQUIRED FROM DIRECTOR                -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <div class="tab-content" id="tab-director-action">
+
+            <div class="action-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h3>Action Required from Director</h3>
+                    <p>Please provide your feedback below for each service. Use the comment fields to share your thoughts on <strong>T-Code (Classification)</strong>, <strong>Activity Type (Setting)</strong>, and <strong>Activity Breakdown</strong>. Add as many bullet points as needed. Click <strong>Submit</strong> when done — your responses will open in your email client ready to send. <strong>Deadline: March 09, 2026.</strong></p>
+                </div>
+            </div>
+
+            <p style="color:#666;font-size:13px;margin-bottom:24px;line-height:1.6;">For each service, review the three areas below and provide your comments. Use the <strong>+ Add Point</strong> button to add bullet-point comments. Your feedback will be used to update the activity template configuration in Recordbase.</p>
+
+            <!-- HOW TO USE guide -->
+            <div style="background:#f0faf5;border:1px solid #b7e4cc;border-radius:8px;padding:14px 20px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start;">
+                <i class="fas fa-lightbulb" style="color:var(--accent2);font-size:18px;margin-top:2px;"></i>
+                <div>
+                    <strong style="color:#155724;font-size:13px;">How to use this form:</strong>
+                    <ul style="margin:6px 0 0 18px;color:#1e7e4e;font-size:13px;line-height:1.8;">
+                        <li>Each service has three comment sections: <strong>T-Code</strong>, <strong>Activity Type</strong>, and <strong>Breakdown</strong>.</li>
+                        <li>Click <strong>+ Add Point</strong> to add bullet-point comments within each section.</li>
+                        <li>Use the <strong>✕</strong> button to remove a point you don't need.</li>
+                        <li>When finished, click <strong>Submit Feedback</strong> — your email client will open with all responses pre-filled.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- SERVICE CARD MACRO: each has T-Code / Type / Breakdown comment sections -->
+
+            <!-- STYLES for bullet comment boxes -->
+            <style>
+                .comment-section { margin-bottom: 18px; }
+                .comment-section-label {
+                    font-size: 11px; font-weight: 700; color: white;
+                    text-transform: uppercase; letter-spacing: 0.5px;
+                    padding: 5px 12px; border-radius: 5px 5px 0 0;
+                    display: inline-flex; align-items: center; gap: 6px;
+                }
+                .lbl-tcode  { background: #1a2e45; }
+                .lbl-type   { background: var(--accent2); }
+                .lbl-breakdown { background: #8e44ad; }
+                .bullet-box {
+                    border: 1.5px solid var(--border); border-radius: 0 6px 6px 6px;
+                    padding: 10px 12px; background: #fafbfe;
+                }
+                .bullet-row {
+                    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+                }
+                .bullet-row::before {
+                    content: "•"; color: var(--accent); font-size: 18px;
+                    line-height: 1; flex-shrink: 0;
+                }
+                .bullet-input {
+                    flex: 1; padding: 7px 10px; border: 1.5px solid var(--border);
+                    border-radius: 5px; font-size: 13px; font-family: inherit;
+                    color: #333; outline: none; transition: border 0.2s;
+                    background: white;
+                }
+                .bullet-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(41,128,185,0.10); }
+                .bullet-remove {
+                    background: none; border: none; color: #ccc; cursor: pointer;
+                    font-size: 16px; padding: 2px 4px; line-height: 1;
+                    transition: color 0.15s; flex-shrink: 0;
+                }
+                .bullet-remove:hover { color: var(--danger); }
+                .bullet-add-btn {
+                    background: none; border: 1.5px dashed var(--border);
+                    color: var(--accent); padding: 6px 14px; border-radius: 5px;
+                    cursor: pointer; font-size: 12px; font-family: inherit;
+                    width: 100%; text-align: left; margin-top: 4px; transition: 0.2s;
+                }
+                .bullet-add-btn:hover { border-color: var(--accent); background: #edf5fb; }
+                .service-card-tabs {
+                    display: flex; gap: 0; border-bottom: 2px solid var(--border);
+                    margin-bottom: 18px;
+                }
+                .svc-tab-btn {
+                    padding: 8px 16px; background: none; border: none;
+                    font-size: 12px; font-weight: 700; color: #888;
+                    cursor: pointer; font-family: inherit; border-bottom: 3px solid transparent;
+                    margin-bottom: -2px; transition: 0.2s;
+                }
+                .svc-tab-btn.active { color: var(--primary); border-bottom-color: var(--accent); }
+                .svc-tab-pane { display: none; }
+                .svc-tab-pane.active { display: block; }
+            </style>
+
+            <!-- Helper to build service cards -->
+            <!-- Clinical Mental Health -->
+            <div class="service-card">
+                <div class="service-card-header">
+                    <span class="service-dot" style="background:#95a5a6;"></span>
+                    <strong>Clinical Mental Health</strong>
+                    <span style="margin-left:auto;font-size:11px;color:#aaa;">Team Code: 011663</span>
+                </div>
+                <div class="service-card-body">
+                    <div class="service-card-tabs">
+                        <button class="svc-tab-btn active" data-stab="cmh-tcode">🏷 T-Code (Classification)</button>
+                        <button class="svc-tab-btn" data-stab="cmh-type">📍 Activity Type</button>
+                        <button class="svc-tab-btn" data-stab="cmh-breakdown">📋 Breakdown</button>
+                    </div>
+                    <div class="svc-tab-pane active" id="cmh-tcode">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-tcode"><i class="fas fa-tags"></i> T-Code (Classification) Comments</span>
+                            <div class="bullet-box" id="bul-cmh-tcode">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. T43 should remain — most common code used"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-cmh-tcode"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="cmh-type">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-type"><i class="fas fa-map-marker-alt"></i> Activity Type (Setting) Comments</span>
+                            <div class="bullet-box" id="bul-cmh-type">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. Onsite (OS) is the primary setting used"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-cmh-type"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="cmh-breakdown">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-breakdown"><i class="fas fa-list-ul"></i> Breakdown Comments</span>
+                            <div class="bullet-box" id="bul-cmh-breakdown">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. F2F – Clinical Hui is needed"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-cmh-breakdown"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Housing & Recovery -->
+            <div class="service-card">
+                <div class="service-card-header">
+                    <span class="service-dot" style="background:#3498db;"></span>
+                    <strong>Housing &amp; Recovery</strong>
+                    <span style="margin-left:auto;font-size:11px;color:#aaa;">Team Code: 015396</span>
+                </div>
+                <div class="service-card-body">
+                    <div class="service-card-tabs">
+                        <button class="svc-tab-btn active" data-stab="hr-tcode">🏷 T-Code (Classification)</button>
+                        <button class="svc-tab-btn" data-stab="hr-type">📍 Activity Type</button>
+                        <button class="svc-tab-btn" data-stab="hr-breakdown">📋 Breakdown</button>
+                    </div>
+                    <div class="svc-tab-pane active" id="hr-tcode">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-tcode"><i class="fas fa-tags"></i> T-Code (Classification) Comments</span>
+                            <div class="bullet-box" id="bul-hr-tcode">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. T43 &amp; T53 are the highest used — agree to keep both"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-hr-tcode"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="hr-type">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-type"><i class="fas fa-map-marker-alt"></i> Activity Type (Setting) Comments</span>
+                            <div class="bullet-box" id="bul-hr-type">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. CM (Community) and DM (Domiciliary) are both needed"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-hr-type"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="hr-breakdown">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-breakdown"><i class="fas fa-list-ul"></i> Breakdown Comments</span>
+                            <div class="bullet-box" id="bul-hr-breakdown">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. F2F – Whanaungatanga is essential for this team"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-hr-breakdown"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Housing & Recovery Intense Rehab -->
+            <div class="service-card">
+                <div class="service-card-header">
+                    <span class="service-dot" style="background:#e67e22;"></span>
+                    <strong>Housing &amp; Recovery Intense Rehab</strong>
+                    <span style="margin-left:auto;font-size:11px;color:#aaa;">Team Code: 011665</span>
+                </div>
+                <div class="service-card-body">
+                    <div class="service-card-tabs">
+                        <button class="svc-tab-btn active" data-stab="hrr-tcode">🏷 T-Code (Classification)</button>
+                        <button class="svc-tab-btn" data-stab="hrr-type">📍 Activity Type</button>
+                        <button class="svc-tab-btn" data-stab="hrr-breakdown">📋 Breakdown</button>
+                    </div>
+                    <div class="svc-tab-pane active" id="hrr-tcode">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-tcode"><i class="fas fa-tags"></i> T-Code (Classification) Comments</span>
+                            <div class="bullet-box" id="bul-hrr-tcode">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. T28 is the primary code — agree with current config"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-hrr-tcode"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="hrr-type">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-type"><i class="fas fa-map-marker-alt"></i> Activity Type (Setting) Comments</span>
+                            <div class="bullet-box" id="bul-hrr-type">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. RE (Residential) is the main setting for this service"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-hrr-type"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="hrr-breakdown">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-breakdown"><i class="fas fa-list-ul"></i> Breakdown Comments</span>
+                            <div class="bullet-box" id="bul-hrr-breakdown">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. F2F – Clinical Hui and Non F2F – Admin are sufficient"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-hrr-breakdown"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rapua -->
+            <div class="service-card">
+                <div class="service-card-header">
+                    <span class="service-dot" style="background:#27ae60;"></span>
+                    <strong>Rapua</strong>
+                    <span style="margin-left:auto;font-size:11px;color:#aaa;">Team Code: 016684</span>
+                </div>
+                <div class="service-card-body">
+                    <div class="service-card-tabs">
+                        <button class="svc-tab-btn active" data-stab="rapua-tcode-f">🏷 T-Code (Classification)</button>
+                        <button class="svc-tab-btn" data-stab="rapua-type-f">📍 Activity Type</button>
+                        <button class="svc-tab-btn" data-stab="rapua-breakdown-f">📋 Breakdown</button>
+                    </div>
+                    <div class="svc-tab-pane active" id="rapua-tcode-f">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-tcode"><i class="fas fa-tags"></i> T-Code (Classification) Comments</span>
+                            <div class="bullet-box" id="bul-rapua-tcode">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. T45 Peer Support is heavily used — ensure it stays"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-rapua-tcode"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="rapua-type-f">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-type"><i class="fas fa-map-marker-alt"></i> Activity Type (Setting) Comments</span>
+                            <div class="bullet-box" id="bul-rapua-type">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. CM, DM and MC are the most relevant settings"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-rapua-type"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                    <div class="svc-tab-pane" id="rapua-breakdown-f">
+                        <div class="comment-section">
+                            <span class="comment-section-label lbl-breakdown"><i class="fas fa-list-ul"></i> Breakdown Comments</span>
+                            <div class="bullet-box" id="bul-rapua-breakdown">
+                                <div class="bullet-row"><input type="text" class="bullet-input" placeholder="e.g. F2F – Whanaungatanga is key for this service"><button class="bullet-remove" title="Remove">✕</button></div>
+                            </div>
+                            <button class="bullet-add-btn" data-bulbox="bul-rapua-breakdown"><i class="fas fa-plus"></i> Add Point</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Submit -->
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:2px solid var(--border);">
+                <button class="submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Feedback
+                </button>
+                <span id="submit-hint" style="font-size:13px;color:#aaa;font-style:italic;"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT & FOOTER -->
+    <div class="contact-info">
+        <div class="contact-card"><h4><i class="fas fa-user"></i> Project Lead</h4><p><strong>Gourav Saini</strong></p></div>
+        <div class="contact-card"><h4><i class="fas fa-hands-helping"></i> Support</h4><p><strong>Data, Quality and Service Delivery Team</strong></p></div>
+        <div class="contact-card"><h4><i class="fas fa-user-graduate"></i> Advisory</h4><p><strong>Traci-Mae Nathan</strong></p></div>
+    </div>
+    <div class="footer">
+        <p>PRIMHD T-Code Alignment Project | Data Pack for Julia Aramoana Team | Prepared by Gourav Saini, 2025</p>
+        <p>Confidential: For Mahitahi Project Stakeholders Review Only</p>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+        <i class="fas fa-check-circle modal-icon"></i>
+        <h3>Submission Sent!</h3>
+        <p>Your feedback has been pre-filled into your email client. Please review and send it to <strong><span id="contact-email"></span></strong>. The project team will review your input and follow up as required.</p>
+        <button class="modal-close-btn" id="closeModalBtn">Close</button>
+    </div>
+</div>
+
+<script>
+(function() {
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    if (tabId === 'tab-current-config' && !usageChart) {
+        setTimeout(initChart, 100);
+    }
+}
+
+function applyGlobalFilter() {
+    var sel = document.getElementById('globalServiceFilter');
+    if (!sel) return;
+    var val = sel.value;
+    var badge = document.getElementById('activeBadge');
+    var resetBtn = document.getElementById('resetBtn');
+    if (val === 'all') {
+        if (badge) badge.style.display = 'none';
+        if (resetBtn) resetBtn.style.display = 'none';
+    } else {
+        if (badge) { badge.textContent = 'Filter: ' + val; badge.style.display = 'inline-block'; }
+        if (resetBtn) resetBtn.style.display = 'inline-block';
+    }
+    document.querySelectorAll('tbody tr[data-service]').forEach(function(row) {
+        var svc = row.getAttribute('data-service');
+        row.style.display = (val === 'all' || svc === val) ? '' : 'none';
+    });
+    document.querySelectorAll('#template-config-container .team-group[data-service]').forEach(function(g) {
+        var svc = g.getAttribute('data-service');
+        g.style.display = (val === 'all' || svc === val) ? '' : 'none';
+    });
+    updateChartData(val);
+}
+
+function resetFilter() {
+    var sel = document.getElementById('globalServiceFilter');
+    if (sel) sel.value = 'all';
+    applyGlobalFilter();
+}
+
+function toggleTable(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleTemplate(tid) {
+    var body = document.getElementById(tid);
+    var chev = document.getElementById('chev-' + tid);
+    if (!body) return;
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    if (chev) chev.classList.toggle('open', !open);
+}
+
+function toggleTeam(safeId) {
+    var container = document.getElementById('team-' + safeId);
+    if (!container) return;
+    container.style.display = container.style.display === 'none' ? 'flex' : 'none';
+}
+
+function expandAllTemplates() {
+    document.querySelectorAll('.tmpl-body').forEach(function(b) { b.style.display = 'block'; });
+    document.querySelectorAll('.tmpl-chevron').forEach(function(c) { c.classList.add('open'); });
+    document.querySelectorAll('.team-templates').forEach(function(t) { t.style.display = 'flex'; });
+}
+
+function collapseAllTemplates() {
+    document.querySelectorAll('.tmpl-body').forEach(function(b) { b.style.display = 'none'; });
+    document.querySelectorAll('.tmpl-chevron').forEach(function(c) { c.classList.remove('open'); });
+    document.querySelectorAll('.team-templates').forEach(function(t) { t.style.display = 'none'; });
+}
+
+function addRow(tableId) {
+    var tbody = document.querySelector('#' + tableId + ' tbody');
+    if (!tbody) return;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" class="breakdown-input" placeholder="Engagement / Breakdown Type"></td>';
+    tbody.appendChild(tr);
+}
+
+// ── Bullet-point comment system ──────────────────────────────────────
+function addBullet(boxId) {
+    var box = document.getElementById(boxId);
+    if (!box) return;
+    var row = document.createElement('div');
+    row.className = 'bullet-row';
+    row.innerHTML = '<input type="text" class="bullet-input" placeholder="Add your comment here…"><button class="bullet-remove" title="Remove">✕</button>';
+    row.querySelector('.bullet-remove').addEventListener('click', function() {
+        row.remove();
+    });
+    box.appendChild(row);
+    row.querySelector('input').focus();
+}
+
+function getBullets(boxId) {
+    var box = document.getElementById(boxId);
+    if (!box) return [];
+    var inputs = box.querySelectorAll('input');
+    var out = [];
+    inputs.forEach(function(inp) {
+        var val = inp.value.trim();
+        if (val) out.push('  • ' + val);
+    });
+    return out;
+}
+
+// ── Service card inner tabs ──────────────────────────────────────────
+function initServiceTabs() {
+    document.querySelectorAll('.svc-tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var targetId = btn.getAttribute('data-stab');
+            var card = btn.closest('.service-card-body');
+            card.querySelectorAll('.svc-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            card.querySelectorAll('.svc-tab-pane').forEach(function(p) { p.classList.remove('active'); });
+            btn.classList.add('active');
+            var pane = document.getElementById(targetId);
+            if (pane) pane.classList.add('active');
+        });
+    });
+}
+
+// ── Bullet add buttons ────────────────────────────────────────────────
+function initBulletButtons() {
+    document.querySelectorAll('.bullet-add-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            addBullet(btn.getAttribute('data-bulbox'));
+        });
+    });
+    // Wire existing remove buttons
+    document.querySelectorAll('.bullet-remove').forEach(function(btn) {
+        btn.addEventListener('click', function() { btn.closest('.bullet-row').remove(); });
+    });
+}
+
+// ── Breakdown filter (E section in recommendations) ──────────────────
+function initBdFilter() {
+    var sel = document.getElementById('bdServiceFilter');
+    if (!sel) return;
+    sel.addEventListener('change', function() {
+        var val = sel.value;
+        // B table (type-suggested) has placeholder rows — always show all on B
+        // Only C table (bd-suggested) filters by which team-pill is present
+        document.querySelectorAll('#bd-suggested-table tbody tr').forEach(function(row) {
+            if (val === 'all') {
+                row.style.display = '';
+                return;
+            }
+            // Check if any team-pill in this row matches the selected service
+            var pills = row.querySelectorAll('.team-pill');
+            var match = false;
+            for (var i = 0; i < pills.length; i++) {
+                if (pills[i].textContent.trim() === val) {
+                    match = true;
+                    break;
+                }
+            }
+            row.style.display = match ? '' : 'none';
+        });
+    });
+}
+
+var usageChart;
+function initChart() {
+    var ctx = document.getElementById('usageChart');
+    if (!ctx || !window.Chart) return;
+    usageChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['H&R T43','H&R T53','IRR T28','Rapua T43','TP T43','TP T08','Rapua T53','H&R T08','Rapua T35','H&R T35'],
+            datasets: [{
+                label: 'Activity Count',
+                data: [13649, 7838, 5131, 5374, 4211, 3168, 2296, 1354, 1224, 620],
+                backgroundColor: [
+                    'rgba(52,152,219,0.75)','rgba(52,152,219,0.55)',
+                    'rgba(230,126,34,0.75)',
+                    'rgba(39,174,96,0.75)','rgba(39,174,96,0.55)',
+                    'rgba(231,76,60,0.75)','rgba(231,76,60,0.55)',
+                    'rgba(52,152,219,0.40)',
+                    'rgba(39,174,96,0.40)','rgba(52,152,219,0.30)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: 'T-Code Utilisation — All Services (Jul 2024–Apr 2026)', font: { size: 14 } },
+                legend: { display: false },
+                tooltip: { callbacks: { label: function(ctx) { return ' ' + ctx.parsed.y.toLocaleString() + ' activities'; } } }
+            },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Number of Activities' } } }
+        }
+    });
+}
+
+function updateChartData(s) {
+    var d = {
+        'all': {
+            labels: ['H&R T43','H&R T53','IRR T28','Rapua T43','TP T43','TP T08','Rapua T53','H&R T08','Rapua T35','H&R T35'],
+            data: [13649,7838,5131,5374,4211,3168,2296,1354,1224,620]
+        },
+        'Clinical Mental Health': { labels: ['T43','T53'], data: [17,1] },
+        'Housing & Recovery': { labels: ['T43','T53','T08','T35','T39','T44','T47','T38','T32','T15','T01'], data: [13649,7838,1354,620,205,22,9,4,13,2,3] },
+        'Housing & Recovery Intense Rehab': { labels: ['T28','T37'], data: [5131,370] },
+        'Rapua': { labels: ['T43','T53','T35','T45','T08','T44','T39','T41','T46','T47','T32','T40','T24','T15','T01'], data: [5374,2296,1224,859,728,35,28,20,14,6,3,2,3,1,1] },
+        'Te Paerangi': { labels: ['T43','T08','T53','T35','T47','T45','T39','T41','T32','T38','T44','T46','T15','T01'], data: [4211,3168,698,473,197,130,38,35,32,19,12,6,10,10] }
+    };
+    var cd = d[s] || d['all'];
+    if (usageChart) {
+        usageChart.data.labels = cd.labels;
+        usageChart.data.datasets[0].data = cd.data;
+        var colors = cd.data.map(function(v,i) {
+            var palette = ['rgba(52,152,219,0.75)','rgba(39,174,96,0.75)','rgba(230,126,34,0.75)','rgba(155,89,182,0.75)','rgba(231,76,60,0.75)','rgba(26,188,156,0.75)','rgba(241,196,15,0.75)'];
+            return palette[i % palette.length];
+        });
+        usageChart.data.datasets[0].backgroundColor = colors;
+        usageChart.options.plugins.title.text = 'T-Code Utilisation — ' + (s === 'all' ? 'All Services' : s) + ' (Jul 2024–Apr 2026)';
+        usageChart.update();
+    }
+}
+
+function toggleChart() {
+    var c = document.querySelector('.chart-container');
+    if (!c) return;
+    if (c.style.display === 'none') {
+        c.style.display = 'block';
+        if (!usageChart) initChart(); else usageChart.resize();
+    } else {
+        c.style.display = 'none';
+    }
+}
+
+function collectBullets(label, boxId) {
+    var bullets = getBullets(boxId);
+    if (!bullets.length) return label + '\n  (no comments provided)';
+    return label + '\n' + bullets.join('\n');
+}
+
+function handleSubmit() {
+    var nameEl = document.getElementById('director-name');
+    var director = nameEl ? nameEl.textContent.trim() : 'Director';
+    var date = new Date().toLocaleDateString('en-NZ', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    var services = [
+        { name: 'Clinical Mental Health',           tcode: 'bul-cmh-tcode',    type: 'bul-cmh-type',    bd: 'bul-cmh-breakdown' },
+        { name: 'Housing & Recovery',               tcode: 'bul-hr-tcode',     type: 'bul-hr-type',     bd: 'bul-hr-breakdown' },
+        { name: 'Housing & Recovery Intense Rehab', tcode: 'bul-hrr-tcode',    type: 'bul-hrr-type',    bd: 'bul-hrr-breakdown' },
+        { name: 'Rapua',                            tcode: 'bul-rapua-tcode',  type: 'bul-rapua-type',  bd: 'bul-rapua-breakdown' },
+        { name: 'Te Paerangi',                      tcode: 'bul-tp-tcode',     type: 'bul-tp-type',     bd: 'bul-tp-breakdown' }
+    ];
+
+    var lines = [
+        'PRIMHD T-Code Alignment — Director Feedback',
+        '==============================================',
+        '',
+        'Director : ' + director,
+        'Submitted: ' + date,
+        '',
+        'FEEDBACK BY SERVICE',
+        '==============================================',
+    ];
+
+    services.forEach(function(s) {
+        lines.push('');
+        lines.push('──────────────────────────────');
+        lines.push('Service: ' + s.name);
+        lines.push('');
+        lines.push(collectBullets('T-Code (Classification) Comments:', s.tcode));
+        lines.push('');
+        lines.push(collectBullets('Activity Type (Setting) Comments:', s.type));
+        lines.push('');
+        lines.push(collectBullets('Breakdown Comments:', s.bd));
+    });
+
+    lines.push('');
+    lines.push('==============================================');
+    lines.push('Submitted via PRIMHD T-Code Alignment Director Data Pack.');
+    lines.push('Regards, ' + director);
+
+    var em = 'gourav.saini' + String.fromCharCode(64) + 'mahitahi.co.nz';
+    var subject = encodeURIComponent('PRIMHD Feedback — ' + director);
+    var body = encodeURIComponent(lines.join('\n'));
+    window.location.href = 'mailto:' + em + '?subject=' + subject + '&body=' + body;
+
+    var hint = document.getElementById('submit-hint');
+    if (hint) hint.textContent = 'Your email client is opening…';
+    setTimeout(function() {
+        var modal = document.getElementById('successModal');
+        if (modal) modal.classList.add('active');
+    }, 700);
+}
+
+function closeModal(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Tab buttons
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var tabId = btn.getAttribute('data-tab');
+            if (tabId) switchTab(tabId, btn);
+        });
+    });
+
+    // Filter
+    var filterSel = document.getElementById('globalServiceFilter');
+    if (filterSel) filterSel.addEventListener('change', applyGlobalFilter);
+
+    var resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) resetBtn.addEventListener('click', resetFilter);
+
+    // Table toggles
+    document.querySelectorAll('[data-toggle]').forEach(function(btn) {
+        btn.addEventListener('click', function() { toggleTable(btn.getAttribute('data-toggle')); });
+    });
+
+    // Chart toggle
+    var chartBtn = document.getElementById('toggleChartBtn');
+    if (chartBtn) chartBtn.addEventListener('click', toggleChart);
+
+    // Expand/collapse templates
+    var expandBtn = document.getElementById('expandAllBtn');
+    if (expandBtn) expandBtn.addEventListener('click', expandAllTemplates);
+    var collapseBtn = document.getElementById('collapseAllBtn');
+    if (collapseBtn) collapseBtn.addEventListener('click', collapseAllTemplates);
+
+    // Team toggles
+    document.querySelectorAll('[data-team]').forEach(function(btn) {
+        btn.addEventListener('click', function() { toggleTeam(btn.getAttribute('data-team')); });
+    });
+
+    // Template card toggles
+    document.querySelectorAll('[data-tmpl]').forEach(function(el) {
+        el.addEventListener('click', function() { toggleTemplate(el.getAttribute('data-tmpl')); });
+    });
+
+    // Add row buttons (legacy, kept for compatibility)
+    document.querySelectorAll('[data-addrow]').forEach(function(btn) {
+        btn.addEventListener('click', function() { addRow(btn.getAttribute('data-addrow')); });
+    });
+
+    // New bullet / service tab systems
+    initServiceTabs();
+    initBulletButtons();
+    initBdFilter();
+
+    // Submit
+    var submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.addEventListener('click', handleSubmit);
+
+    // Modal close
+    var closeBtn = document.getElementById('closeModalBtn');
+    if (closeBtn) closeBtn.addEventListener('click', function() { closeModal('successModal'); });
+
+    // Editable director name
+    var nameEl = document.getElementById('director-name');
+    if (nameEl) {
+        nameEl.addEventListener('click', function() {
+            var n = prompt('Enter Director Name:', nameEl.textContent);
+            if (n && n.trim()) nameEl.textContent = n.trim();
+        });
+    }
+
+    // Contact email
+    var emailEl = document.getElementById('contact-email');
+    if (emailEl) emailEl.textContent = 'gourav.saini' + String.fromCharCode(64) + 'mahitahi.co.nz';
+
+});
+
+})();
+</script>
+</body>
+</html>
