@@ -1501,7 +1501,7 @@
         <div class="contact-card"><h4><i class="fas fa-user-graduate"></i> Advisory</h4><p><strong>Traci-Mae Nathan</strong></p></div>
     </div>
     <div class="footer">
-        <p>PRIMHD T-Code Alignment Project | Data Pack for Julia Aramoana Team | Prepared by Gourav Saini, May 2026</p>
+        <p>PRIMHD T-Code Alignment Project | Data Pack for Julia Aramoana Team | Prepared by Gourav Saini, 2025</p>
         <p>Confidential: For Mahitahi Project Stakeholders Review Only</p>
     </div>
 </div>
@@ -1532,6 +1532,14 @@
 
 <script>
 (function() {
+
+// ─── GOOGLE SHEET BACKEND CONFIG ──────────────────────────────────────
+// 1. Deploy the Apps Script web app (see setup guide) and paste its URL below.
+// 2. Leave SHEETS_ENDPOINT as '' to disable the sheet and use email only.
+var SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwBbeZ74ylDkUaJ4AK1Xb6d2AU0zh3gEA4lIZ6QjVKlajQvZ4uA8AgiHI7LCj6XQ-pK/exec';                 // ← paste your Web App URL here
+var PACK_NAME       = 'Julia Aramoana Team';
+var SEND_EMAIL      = true;               // set to false to stop opening the email client
+// ──────────────────────────────────────────────────────────────────────
 
 function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
@@ -1827,13 +1835,31 @@ function handleSubmit() {
         refreshSubmissionsPanel();
     } catch (e) {}
 
-    var em = 'gourav.saini' + String.fromCharCode(64) + 'mahitahi.co.nz';
-    var subject = encodeURIComponent('PRIMHD Feedback — ' + director);
-    var body = encodeURIComponent(lines.join('\n'));
-    window.location.href = 'mailto:' + em + '?subject=' + subject + '&body=' + body;
+    // Send to Google Sheet backend (fire-and-forget)
+    if (SHEETS_ENDPOINT) {
+        try {
+            fetch(SHEETS_ENDPOINT, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    pack: PACK_NAME,
+                    director: director,
+                    date: date,
+                    services: submissionData.services
+                })
+            });
+        } catch (e) {}
+    }
+
+    if (SEND_EMAIL) {
+        var em = 'gourav.saini' + String.fromCharCode(64) + 'mahitahi.co.nz';
+        var subject = encodeURIComponent('PRIMHD Feedback — ' + director);
+        var body = encodeURIComponent(lines.join('\n'));
+        window.location.href = 'mailto:' + em + '?subject=' + subject + '&body=' + body;
+    }
 
     var hint = document.getElementById('submit-hint');
-    if (hint) hint.textContent = 'Your email client is opening…';
+    if (hint) hint.textContent = SEND_EMAIL ? 'Your email client is opening…' : 'Your feedback has been recorded. Thank you.';
     setTimeout(function() {
         var modal = document.getElementById('successModal');
         if (modal) modal.classList.add('active');
