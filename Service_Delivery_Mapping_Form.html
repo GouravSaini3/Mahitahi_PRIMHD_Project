@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Service Delivery Mapping Form</title>
+  <!-- SheetJS: used to export records as a real .xlsx Excel workbook -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --border: #d6d6d6;
@@ -86,7 +88,6 @@
     .empty-records { color: var(--muted); font-size: 14px; padding: 18px; text-align: center; border: 1px dashed var(--border); border-radius: 10px; }
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 12px 18px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,0.2); z-index: 1000; opacity: 0; transition: opacity .2s; }
     .toast.show { opacity: 1; }
-    .edit-banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 700; }
     @media print {
       #recordsPanel { display: none; }
       body { background: white; padding: 0; }
@@ -108,10 +109,6 @@
     <p class="intro">Use this form to define service activities, delivery pathways, outcome types, evidence requirements, and KPI measures. Complete one form per service, team, or programme.</p>
 
     <form>
-      <div id="editBanner" class="edit-banner" style="display:none;">
-        <span>Editing existing record: <span id="editBannerName"></span></span>
-        <button type="button" class="secondary small-button" onclick="cancelEdit()">Cancel edit</button>
-      </div>
       <h2>Service Information</h2>
       <p class="section-instruction">Complete this section first so the mapping can be linked to the right service area, manager, programme, and whānau group.</p>
       <div class="grid">
@@ -211,7 +208,7 @@
       <div class="actions">
         <button type="button" class="secondary" onclick="window.print()">Print / Save as PDF</button>
         <button type="reset" class="secondary">Clear Form</button>
-        <button type="button" class="primary" id="submitBtn" onclick="submitForm()">Submit</button>
+        <button type="button" class="primary" onclick="submitForm()">Submit</button>
       </div>
     </form>
   </main>
@@ -221,7 +218,8 @@
     <p class="intro">All forms submitted on this device are listed below. Records are stored locally in this browser. Deleting a record requires the admin password.</p>
     <div class="records-toolbar">
       <span id="recordsCount" class="note" style="margin:0;"></span>
-      <div style="display:flex; gap:10px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="primary small-button" onclick="exportRecordsExcel()">Download Excel (.xlsx)</button>
         <button type="button" class="secondary small-button" onclick="exportRecords()">Export all (JSON)</button>
         <button type="button" class="secondary small-button" onclick="renderRecords()">Refresh</button>
       </div>
@@ -314,6 +312,19 @@
     const STORAGE_KEY = 'sdMappingRecords';
     const DELETE_PASSWORD = 'Mahitahi@2026';
 
+    /* ====================== CONFIGURATION ======================
+       EMAIL_TO        : where submitted forms are emailed.
+       EMAIL_ON_SUBMIT : true = open the mail client automatically on every submit.
+       LIVE_SYNC_URL   : paste your Power Automate "When a HTTP request is received"
+                         URL here to write each submission straight into an Excel
+                         table (OneDrive / SharePoint) in real time.
+                         Leave it as '' to disable. Full setup steps are in the
+                         instructions file provided with this form.
+    =============================================================== */
+    const EMAIL_TO = 'ngahuia.hunter@mahitahi.co.nz';
+    const EMAIL_ON_SUBMIT = true;
+    const LIVE_SYNC_URL = ''; // e.g. 'https://prod-12.westus.logic.azure.com:443/workflows/.../triggers/manual/paths/invoke?...'
+
     function esc(value) {
       return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
         return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
@@ -358,30 +369,10 @@
       setTimeout(function () { toast.classList.remove('show'); }, 2200);
     }
 
-    let editingId = null;
-
-    function setValue(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.value = value == null ? '' : value;
-    }
-
-    function rebuildRows(bodyId, addFn, dataRows, keys) {
-      const body = document.getElementById(bodyId);
-      body.innerHTML = '';
-      const rows = (dataRows && dataRows.length) ? dataRows : [];
-      const count = Math.max(rows.length, 1);
-      for (let i = 0; i < count; i += 1) addFn();
-      const trs = body.querySelectorAll('tr');
-      rows.forEach(function (data, idx) {
-        const fields = trs[idx].querySelectorAll('input, textarea, select');
-        keys.forEach(function (key, fi) {
-          if (fields[fi] != null && data[key] != null) fields[fi].value = data[key];
-        });
-      });
-    }
-
     function submitForm() {
-      const data = {
+      const record = {
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        submittedAt: new Date().toISOString(),
         serviceInfo: {
           serviceName: val('serviceName'),
           teamProgramme: val('teamProgramme'),
@@ -404,87 +395,23 @@
         notes: val('notes')
       };
 
-      if (!data.serviceInfo.serviceName) {
+      if (!record.serviceInfo.serviceName) {
         alert('Please enter a Service Name before submitting.');
         document.getElementById('serviceName').focus();
         return;
       }
 
       const records = loadRecords();
-
-      if (editingId) {
-        const idx = records.findIndex(function (r) { return r.id === editingId; });
-        if (idx !== -1) {
-          records[idx] = Object.assign({}, records[idx], data, { updatedAt: new Date().toISOString() });
-          showToast('Record updated.');
-        } else {
-          showToast('Original record no longer exists; nothing updated.');
-        }
-        exitEditMode();
-      } else {
-        data.id = 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-        data.submittedAt = new Date().toISOString();
-        records.unshift(data);
-        showToast('Record submitted and saved.');
-      }
-
+      records.unshift(record);
       saveRecords(records);
       renderRecords();
+
+      sendToCloud(record);              // optional live Google Sheet / Excel sync
+      if (EMAIL_ON_SUBMIT) emailRecord(record);   // open Outlook / default mail client
+
+      showToast('Record submitted and saved.');
       document.querySelector('form').reset();
       document.getElementById('recordsPanel').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function editRecord(id) {
-      const entered = prompt('Enter the admin password to edit this record:');
-      if (entered === null) return;
-      if (entered !== DELETE_PASSWORD) {
-        alert('Incorrect password. Editing is not allowed.');
-        return;
-      }
-      const record = loadRecords().find(function (r) { return r.id === id; });
-      if (!record) { alert('Record not found.'); return; }
-
-      const si = record.serviceInfo || {};
-      setValue('serviceName', si.serviceName);
-      setValue('teamProgramme', si.teamProgramme);
-      setValue('serviceManager', si.serviceManager);
-      setValue('targetPopulation', si.targetPopulation);
-      setValue('servicePurpose', si.servicePurpose);
-
-      rebuildRows('serviceActivitiesBody', addServiceActivityRow, record.activities, ['activity', 'description', 'supportType']);
-      rebuildRows('goalRulesBody', addGoalRuleRow, record.goalRules, ['activity', 'goalRequired', 'condition']);
-      rebuildRows('outcomeMappingBody', addOutcomeMappingRow, record.outcomes, ['outcomeArea', 'immediate', 'milestone', 'sustained']);
-      rebuildRows('evidenceBody', addEvidenceRow, record.evidence, ['activity', 'recordingMethod', 'evidenceSource']);
-      rebuildRows('kpiBody', addKpiRow, record.kpis, ['type', 'measure', 'target', 'review']);
-
-      const factors = record.goalRuleFactors || [];
-      document.querySelectorAll('input[name="goalRule"]').forEach(function (c) {
-        c.checked = factors.indexOf(c.parentElement.textContent.trim()) !== -1;
-      });
-
-      const success = record.success || {};
-      setValue('immediateSuccess', success.immediate);
-      setValue('milestoneSuccess', success.milestone);
-      setValue('sustainedSuccess', success.sustained);
-      setValue('notes', record.notes);
-
-      editingId = id;
-      document.getElementById('editBannerName').textContent = si.serviceName || 'Unnamed service';
-      document.getElementById('editBanner').style.display = 'flex';
-      document.getElementById('submitBtn').textContent = 'Update record';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function exitEditMode() {
-      editingId = null;
-      document.getElementById('editBanner').style.display = 'none';
-      document.getElementById('submitBtn').textContent = 'Submit';
-    }
-
-    function cancelEdit() {
-      exitEditMode();
-      document.querySelector('form').reset();
-      showToast('Edit cancelled.');
     }
 
     function fieldLine(label, value) {
@@ -515,7 +442,6 @@
       list.innerHTML = records.map(function (r) {
         const si = r.serviceInfo || {};
         const submitted = new Date(r.submittedAt).toLocaleString();
-        const updated = r.updatedAt ? ' · Edited ' + new Date(r.updatedAt).toLocaleString() : '';
         const metaParts = [si.teamProgramme, si.serviceManager].filter(Boolean).join(' · ');
 
         const body =
@@ -556,11 +482,10 @@
             '<div class="record-head" onclick="toggleRecord(\'' + esc(r.id) + '\')">' +
               '<div>' +
                 '<div class="record-title">' + esc(si.serviceName || 'Unnamed service') + '</div>' +
-                '<div class="record-meta">' + (metaParts ? esc(metaParts) + ' · ' : '') + 'Submitted ' + esc(submitted) + esc(updated) + '</div>' +
+                '<div class="record-meta">' + (metaParts ? esc(metaParts) + ' · ' : '') + 'Submitted ' + esc(submitted) + '</div>' +
               '</div>' +
               '<div class="record-head-actions">' +
                 '<button type="button" class="secondary small-button" onclick="event.stopPropagation(); toggleRecord(\'' + esc(r.id) + '\')">View / hide</button>' +
-                '<button type="button" class="primary small-button" onclick="event.stopPropagation(); editRecord(\'' + esc(r.id) + '\')">Edit</button>' +
                 '<button type="button" class="danger small-button" onclick="event.stopPropagation(); deleteRecord(\'' + esc(r.id) + '\')">Delete</button>' +
               '</div>' +
             '</div>' +
@@ -585,6 +510,185 @@
       saveRecords(records);
       renderRecords();
       showToast('Record deleted.');
+    }
+
+    /* ---------- Build a readable text version of a record for email ---------- */
+    function rowsToText(title, rows, keys, labels) {
+      if (!rows || !rows.length) return title + ':\n  (none recorded)\n';
+      let out = title + ':\n';
+      rows.forEach(function (row, idx) {
+        const parts = keys.map(function (k, i) {
+          return labels[i] + ': ' + (row[k] || '-');
+        });
+        out += '  ' + (idx + 1) + ') ' + parts.join(' | ') + '\n';
+      });
+      return out;
+    }
+
+    function recordToPlainText(r) {
+      const si = r.serviceInfo || {};
+      const su = r.success || {};
+      let t = '';
+      t += 'SERVICE DELIVERY MAPPING FORM\n';
+      t += 'Submitted: ' + new Date(r.submittedAt).toLocaleString() + '\n';
+      t += '======================================\n\n';
+
+      t += 'SERVICE INFORMATION\n';
+      t += '  Service Name: ' + (si.serviceName || '-') + '\n';
+      t += '  Team / Programme: ' + (si.teamProgramme || '-') + '\n';
+      t += '  Service Manager: ' + (si.serviceManager || '-') + '\n';
+      t += '  Target Population: ' + (si.targetPopulation || '-') + '\n';
+      t += '  Primary Service Purpose: ' + (si.servicePurpose || '-') + '\n\n';
+
+      t += rowsToText('1. SERVICE ACTIVITIES', r.activities, ['activity', 'description', 'supportType'], ['Activity', 'Description', 'Support Type']) + '\n';
+      t += rowsToText('2. GOAL PLANNING RULES', r.goalRules, ['activity', 'goalRequired', 'condition'], ['Activity', 'Goal Plan Required', 'Reason/Condition']);
+      if (r.goalRuleFactors && r.goalRuleFactors.length) {
+        t += '  Goal Plan factors: ' + r.goalRuleFactors.join('; ') + '\n';
+      }
+      t += '\n';
+      t += rowsToText('3. OUTCOME MAPPING', r.outcomes, ['outcomeArea', 'immediate', 'milestone', 'sustained'], ['Outcome Area', 'Immediate', 'Milestone', 'Sustained']) + '\n';
+      t += rowsToText('4. EVIDENCE AND RECORDING', r.evidence, ['activity', 'recordingMethod', 'evidenceSource'], ['Activity', 'Recording Method', 'Evidence Source']) + '\n';
+      t += rowsToText('5. KPI FRAMEWORK', r.kpis, ['type', 'measure', 'target', 'review'], ['KPI Type', 'Measure', 'Target', 'Review Period']) + '\n';
+
+      t += '6. SUCCESS DEFINITION\n';
+      t += '  Immediate Success: ' + (su.immediate || '-') + '\n';
+      t += '  Milestone Success: ' + (su.milestone || '-') + '\n';
+      t += '  Sustained Success: ' + (su.sustained || '-') + '\n\n';
+
+      t += '7. NOTES / RISKS / DECISIONS\n';
+      t += '  ' + (r.notes || '(none recorded)') + '\n';
+      return t;
+    }
+
+    /* ---------- Open the mail client (Outlook etc.) pre-filled ---------- */
+    function emailRecord(r) {
+      const si = r.serviceInfo || {};
+      const subject = 'Service Delivery Mapping: ' + (si.serviceName || 'Untitled service');
+      const body = recordToPlainText(r);
+      const mailto = 'mailto:' + encodeURIComponent(EMAIL_TO) +
+        '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(body);
+      // Some mail clients limit URL length; warn if the body is very large.
+      if (mailto.length > 1900) {
+        showToast('Email opened (long forms may be trimmed by Outlook).');
+      }
+      window.location.href = mailto;
+    }
+
+    /* ---------- Flatten a record into one flat object for an Excel table row ---------- */
+    function serializeRows(rows, keys, labels) {
+      if (!rows || !rows.length) return '';
+      return rows.map(function (row, idx) {
+        return (idx + 1) + ') ' + keys.map(function (k, i) {
+          return labels[i] + ': ' + (row[k] || '-');
+        }).join(' | ');
+      }).join('\n');
+    }
+
+    function flattenForExcel(r) {
+      const si = r.serviceInfo || {};
+      const su = r.success || {};
+      return {
+        SubmittedAt: new Date(r.submittedAt).toLocaleString(),
+        ServiceName: si.serviceName || '',
+        TeamProgramme: si.teamProgramme || '',
+        ServiceManager: si.serviceManager || '',
+        TargetPopulation: si.targetPopulation || '',
+        ServicePurpose: si.servicePurpose || '',
+        Activities: serializeRows(r.activities, ['activity', 'description', 'supportType'], ['Activity', 'Description', 'Support Type']),
+        GoalRules: serializeRows(r.goalRules, ['activity', 'goalRequired', 'condition'], ['Activity', 'Required', 'Reason']),
+        GoalPlanFactors: (r.goalRuleFactors || []).join('; '),
+        Outcomes: serializeRows(r.outcomes, ['outcomeArea', 'immediate', 'milestone', 'sustained'], ['Area', 'Immediate', 'Milestone', 'Sustained']),
+        Evidence: serializeRows(r.evidence, ['activity', 'recordingMethod', 'evidenceSource'], ['Activity', 'Method', 'Source']),
+        KPIs: serializeRows(r.kpis, ['type', 'measure', 'target', 'review'], ['Type', 'Measure', 'Target', 'Review']),
+        ImmediateSuccess: su.immediate || '',
+        MilestoneSuccess: su.milestone || '',
+        SustainedSuccess: su.sustained || '',
+        Notes: r.notes || ''
+      };
+    }
+
+    /* ---------- Send one record to a live Excel table via Power Automate (optional) ---------- */
+    function sendToCloud(r) {
+      if (!LIVE_SYNC_URL) return;
+      try {
+        fetch(LIVE_SYNC_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(flattenForExcel(r))
+        }).catch(function () { /* fire-and-forget: errors are not readable cross-origin */ });
+      } catch (e) { /* ignore */ }
+    }
+
+    /* ---------- Export ALL records to a real Excel (.xlsx) workbook ---------- */
+    function exportRecordsExcel() {
+      const records = loadRecords();
+      if (!records.length) { alert('There are no records to export.'); return; }
+      if (typeof XLSX === 'undefined') {
+        alert('The Excel library could not load (no internet?). Using JSON export instead.');
+        exportRecords();
+        return;
+      }
+
+      const services = [];   // one row per submitted form
+      const activities = [];
+      const goalRules = [];
+      const outcomes = [];
+      const evidence = [];
+      const kpis = [];
+
+      records.forEach(function (r) {
+        const si = r.serviceInfo || {};
+        const su = r.success || {};
+        const submitted = new Date(r.submittedAt).toLocaleString();
+        const tag = { 'Service Name': si.serviceName || '', 'Submitted': submitted };
+
+        services.push({
+          'Service Name': si.serviceName || '',
+          'Team / Programme': si.teamProgramme || '',
+          'Service Manager': si.serviceManager || '',
+          'Target Population': si.targetPopulation || '',
+          'Primary Service Purpose': si.servicePurpose || '',
+          'Goal Plan Factors': (r.goalRuleFactors || []).join('; '),
+          'Immediate Success': su.immediate || '',
+          'Milestone Success': su.milestone || '',
+          'Sustained Success': su.sustained || '',
+          'Notes / Risks / Decisions': r.notes || '',
+          'Submitted': submitted
+        });
+
+        (r.activities || []).forEach(function (x) {
+          activities.push(Object.assign({}, tag, { 'Activity': x.activity || '', 'Description': x.description || '', 'Support Type': x.supportType || '' }));
+        });
+        (r.goalRules || []).forEach(function (x) {
+          goalRules.push(Object.assign({}, tag, { 'Activity': x.activity || '', 'Goal Plan Required?': x.goalRequired || '', 'Reason / Condition': x.condition || '' }));
+        });
+        (r.outcomes || []).forEach(function (x) {
+          outcomes.push(Object.assign({}, tag, { 'Outcome Area': x.outcomeArea || '', 'Immediate': x.immediate || '', 'Milestone': x.milestone || '', 'Sustained': x.sustained || '' }));
+        });
+        (r.evidence || []).forEach(function (x) {
+          evidence.push(Object.assign({}, tag, { 'Activity': x.activity || '', 'Recording Method': x.recordingMethod || '', 'Evidence Source': x.evidenceSource || '' }));
+        });
+        (r.kpis || []).forEach(function (x) {
+          kpis.push(Object.assign({}, tag, { 'KPI Type': x.type || '', 'Measure': x.measure || '', 'Target': x.target || '', 'Review Period': x.review || '' }));
+        });
+      });
+
+      const wb = XLSX.utils.book_new();
+      function addSheet(name, data) {
+        const ws = XLSX.utils.json_to_sheet(data.length ? data : [{ 'Note': 'No data' }]);
+        XLSX.utils.book_append_sheet(wb, ws, name);
+      }
+      addSheet('Services', services);
+      addSheet('Activities', activities);
+      addSheet('Goal Rules', goalRules);
+      addSheet('Outcomes', outcomes);
+      addSheet('Evidence', evidence);
+      addSheet('KPIs', kpis);
+
+      XLSX.writeFile(wb, 'sd-mapping-records-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+      showToast('Excel workbook downloaded.');
     }
 
     function exportRecords() {
