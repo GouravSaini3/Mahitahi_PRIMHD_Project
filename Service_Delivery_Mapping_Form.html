@@ -112,9 +112,52 @@
       <h2>Service Information</h2>
       <p class="section-instruction">Complete this section first so the mapping can be linked to the right service area, manager, programme, and whānau group.</p>
       <div class="grid">
-        <div><label for="serviceName">Service Name</label><input id="serviceName" name="serviceName" type="text" /></div>
+        <div><label for="serviceName">Service Name</label>
+          <select id="serviceName" name="serviceName">
+            <option value="">Select a service</option>
+            <option>Kāpuia CMDHB</option>
+            <option>He Korowai Marutau</option>
+            <option>KMPOC Adult</option>
+            <option>Nga Potiki (KMPOC Youth)</option>
+            <option>Rapua</option>
+            <option>Te Paerangi</option>
+            <option>Youth Community Living Services (YCLS)</option>
+            <option>Whānau Advocacy</option>
+            <option>Te Oranga Pūmau (Cultural Support)</option>
+            <option>MSD - Vocational &amp; Community Participation</option>
+            <option>Youth Justice Pre-Programme</option>
+            <option>Youth Justice Programme</option>
+            <option>Community Living Support (CLS)</option>
+            <option>Adult Community Support (CSW)</option>
+            <option>Housing &amp; Recovery</option>
+            <option>Iwi Support Services (ISW)</option>
+            <option>TWO - Daily Living Skills &amp; Activities</option>
+            <option>Mobile Community Support (MCS)</option>
+            <option>Awhi Ora ADHB</option>
+            <option>Awhi Ora CMDHB</option>
+            <option>Housing &amp; Recovery Intense Rehab</option>
+            <option>Acute Community Support Services (ACSS)</option>
+            <option>Assessment Team</option>
+            <option>Kia ora Ake</option>
+            <option>Kia Tupu Whakaritorito</option>
+            <option>Kia Tupu Whakaritorito - Aftercare</option>
+            <option>Kia Tupu Whakaritorito - Assessment</option>
+            <option>Corrections Wiri Womens</option>
+            <option>Corrections Wiri Womens (Aftercare)</option>
+            <option>Corrections Wiri Womens (Assessment)</option>
+          </select>
+        </div>
         <div><label for="teamProgramme">Team / Programme</label><input id="teamProgramme" name="teamProgramme" type="text" /></div>
-        <div><label for="serviceManager">Service Manager</label><input id="serviceManager" name="serviceManager" type="text" /></div>
+        <div><label for="serviceManager">Service Manager</label>
+          <select id="serviceManager" name="serviceManager">
+            <option value="">Select a service manager</option>
+            <option>Ariana Rangi-Sauni</option>
+            <option>Jacqueline Thompson</option>
+            <option>Kalo Teki</option>
+            <option>Benjamin Neho</option>
+            <option>Muy Ly-Arapovic</option>
+          </select>
+        </div>
         <div><label for="targetPopulation">Target Population</label><input id="targetPopulation" name="targetPopulation" type="text" /></div>
         <div class="full"><label for="servicePurpose">Primary Service Purpose</label><textarea id="servicePurpose" name="servicePurpose" placeholder="Briefly describe what this service exists to do."></textarea></div>
       </div>
@@ -233,6 +276,20 @@
     const recordingMethods = ['Activity Template','Goal Plan','Outcome Tool','Both - Activity Template and Goal Plan'];
     const evidenceSources = ['Assessment','Attendance','Clinical Record','Evaluation','Goal Plan Status','Narrative / Pūrākau','Review','Referral Outcome'];
     const kpiTypes = ['Activity KPI', 'Outcome KPI', 'Sustained KPI'];
+    const outcomeAreas = [
+      'Improved mental wellbeing, less distress and anxiety',
+      'Improved living conditions and ability to meet basic needs',
+      'Improved ability, tools and confidence to self-manage wellbeing and daily living',
+      'Increased motivation and focus on the future',
+      'Increased participation in education and employment',
+      'Improved financial stability',
+      'Improved connection to culture, te ao Māori and whakapapa',
+      'Increased confidence and self-worth',
+      'Better relationships with whanau',
+      'Reduced substance-related harm',
+      'Reduced drug/alcohol use',
+      'Reduced occurrence of Police and/or Justice involvement'
+    ];
 
     let serviceActivityCount = 0;
     let goalRuleCount = 0;
@@ -268,7 +325,7 @@
       outcomeMappingCount += 1;
       document.getElementById('outcomeMappingBody').insertAdjacentHTML('beforeend', `
         <tr>
-          <td><input name="outcomeArea${outcomeMappingCount}" type="text" placeholder="e.g. Housing, Cultural Connection, Wellbeing" /></td>
+          <td><select name="outcomeArea${outcomeMappingCount}">${optionList(outcomeAreas, 'Select an outcome area')}</select></td>
           <td><textarea name="immediateOutcome${outcomeMappingCount}"></textarea></td>
           <td><textarea name="milestoneOutcome${outcomeMappingCount}"></textarea></td>
           <td><textarea name="sustainedOutcome${outcomeMappingCount}"></textarea></td>
