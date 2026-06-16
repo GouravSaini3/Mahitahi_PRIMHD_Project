@@ -276,6 +276,20 @@
     const recordingMethods = ['Activity Template','Goal Plan','Outcome Tool','Both - Activity Template and Goal Plan'];
     const evidenceSources = ['Assessment','Attendance','Clinical Record','Evaluation','Goal Plan Status','Narrative / Pūrākau','Review','Referral Outcome'];
     const kpiTypes = ['Activity KPI', 'Outcome KPI', 'Sustained KPI'];
+    const outcomeAreas = [
+      'Improved mental wellbeing, less distress and anxiety',
+      'Improved living conditions and ability to meet basic needs',
+      'Improved ability, tools and confidence to self-manage wellbeing and daily living',
+      'Increased motivation and focus on the future',
+      'Increased participation in education and employment',
+      'Improved financial stability',
+      'Improved connection to culture, te ao Māori and whakapapa',
+      'Increased confidence and self-worth',
+      'Better relationships with whanau',
+      'Reduced substance-related harm',
+      'Reduced drug/alcohol use',
+      'Reduced occurrence of Police and/or Justice involvement'
+    ];
 
     let serviceActivityCount = 0;
     let goalRuleCount = 0;
@@ -311,7 +325,7 @@
       outcomeMappingCount += 1;
       document.getElementById('outcomeMappingBody').insertAdjacentHTML('beforeend', `
         <tr>
-          <td><input name="outcomeArea${outcomeMappingCount}" type="text" placeholder="e.g. Housing, Cultural Connection, Wellbeing" /></td>
+          <td><select name="outcomeArea${outcomeMappingCount}">${optionList(outcomeAreas, 'Select an outcome area')}</select></td>
           <td><textarea name="immediateOutcome${outcomeMappingCount}"></textarea></td>
           <td><textarea name="milestoneOutcome${outcomeMappingCount}"></textarea></td>
           <td><textarea name="sustainedOutcome${outcomeMappingCount}"></textarea></td>
