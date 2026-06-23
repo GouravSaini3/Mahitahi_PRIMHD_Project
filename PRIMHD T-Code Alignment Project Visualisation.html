@@ -228,6 +228,17 @@
             color: #334155;
             margin-bottom: 0.25rem;
         }
+
+        /* Links inside milestones */
+        .milestone-item a {
+            color: #2563eb;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .milestone-item a:hover {
+            text-decoration: underline;
+            color: #1d4ed8;
+        }
         
         .check-icon {
             color: #16a34a;
@@ -456,8 +467,6 @@
                     </div>
                 </div>
 
-
-
                 <div class="stat-item">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -470,7 +479,6 @@
                         <div class="stat-value">Traci-Mae Nathan</div>
                     </div>
                 </div>
-
 
                 <div class="stat-item">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
@@ -655,45 +663,25 @@
                     "Final quality assurance before Director submission"
                 ]
             },
-
-            
-           {
+            {
                 name: "Phase 3: Director Review &amp; Confirmation",
-               duration: "1 week (Before June 9th)",
-               status: "in-progress",
-
-        "Record approved changes for each service"
-    ]
-},
-
-{
-    name: "Phase 4: Activity Design & Training Site Implementation",
-    duration: "2 weeks ",
-    status: "upcoming",
-    milestones: [
-        "Design New Activity Template for each service",
-        "Apply approved configuration changes",
-        "Introduce new valid codes",
-        "Confirm correct mapping across all components"
-    ]
-},
-The one thing to confirm: in whatever function builds your milestone list, each milestone must be inserted with innerHTML, not textContent / innerText. For example:
-
-js
-li.innerHTML = milestone;   // ✅ links render
-li.textContent = milestone; // ❌ shows raw <a> tags as text
-If you paste your render function here, I'll point to the exact line to change and add a bit of CSS so the links pick up your teal accent and look tidy. And if you'd rather not embed HTML in the data at all, the alternative is to give each phase a separate links array and render those as buttons — say the word and I'll restructure it that way.
-
-
-
-Want
-
-            
+                duration: "1 week (Before June 9th)",
+                status: "in-progress",
+                milestones: [
+                    `Share Data Packs with Directors:<br>
+                    &bull; <a href="https://gouravsaini3.github.io/Mahitahi_PRIMHD_Project/PRIMHD_Code_DataPack_JodyBabbington.html" target="_blank" rel="noopener noreferrer">Jody Babbington &mdash; Data Pack</a><br>
+                    &bull; <a href="https://gouravsaini3.github.io/Mahitahi_PRIMHD_Project/PRIMHD_DataPack_JuliaAramoana_Team.html" target="_blank" rel="noopener noreferrer">Julia Aramoana &mdash; Team Data Pack</a><br>
+                    &bull; <a href="https://gouravsaini3.github.io/Mahitahi_PRIMHD_Project/PRIMHD_Code_Data_Pack_DC.html" target="_blank" rel="noopener noreferrer">DC &mdash; Data Pack</a>`,
+                    "Hold hui with Directors and service managers",
+                    "Record approved changes for each service"
+                ]
+            },
             {
                 name: "Phase 4: Activity Design & Training Site Implementation",
-                duration: "2 weeks ",
+                duration: "2 weeks",
                 status: "upcoming",
-                milestones: [ "Design New Activity Template for each service",
+                milestones: [
+                    "Design New Activity Template for each service",
                     "Apply approved configuration changes",
                     "Introduce new valid codes",
                     "Confirm correct mapping across all components"
@@ -712,7 +700,7 @@ Want
             },
             {
                 name: "Phase 6: Live Site Implementation",
-                duration: "2-3 week ",
+                duration: "2-3 weeks",
                 status: "upcoming",
                 milestones: [
                     "Implement changes in Live site",
@@ -723,7 +711,7 @@ Want
             {
                 name: "Phase 7: Post-Implementation Review",
                 duration: "1-2 weeks (June/July 2026)",
-                status: "Inprogress",
+                status: "upcoming",
                 milestones: [
                     "Evaluate system behaviour",
                     "Confirm error reduction",
@@ -733,7 +721,6 @@ Want
         ];
 
         const scope = [
-            
             { title: "Referral & Service", items: ["RD (Referral Discharge)", "TR (Team)", "Service PRIMHD status"] },
             { title: "Activity & Engagement", items: ["AT (Activity)", "CN (Classification)", "Supplementary Codes", "Dynamic Activity Template"] },
             { title: "Compliance", items: ["HISO 10023.3:2025 alignment", "Team/Activity/Setting mapping", "Legacy code retirement"] }
@@ -755,8 +742,6 @@ Want
             { risk: "Staff resistance to change", impact: "Adoption issues", mitigation: "Clear communication, show data patterns" }
         ];
 
-
-
         // Tab switching function
         function switchTab(tabName) {
             document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
@@ -770,9 +755,9 @@ Want
         function renderTimeline() {
             const container = document.getElementById('timeline-container');
             container.innerHTML = phases.map((phase, index) => {
-                const statusText = phase.status === 'in-progress' ? 'in-progress' : 
-                                   phase.status === 'Completed' ? 'Completed'
-                                                                 : 'Upcoming';
+                const statusText = phase.status === 'in-progress' ? 'In progress' :
+                                   phase.status === 'Completed' ? 'Completed' :
+                                   'Upcoming';
                 
                 return `
                     <div class="phase">
@@ -864,11 +849,6 @@ Want
                 </div>
             `).join('');
         }
-
-
-
-
-
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
