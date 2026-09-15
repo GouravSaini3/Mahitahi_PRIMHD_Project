@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordbase Permission Tiers - Implementation Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #185FA5;
+            --primary-dark: #0C447C;
+            --accent: #378ADD;
+            --success: #639922;
+            --warning: #BA7517;
+            --danger: #E24B4A;
+            --light-bg: #F5F5F5;
+            --white: #FFFFFF;
+            --text-primary: #2C2C2A;
+            --text-secondary: #5F5E5A;
+            --border-color: #D3D1C7;
+            --radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--light-bg);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        nav {
+            background: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .status-banner {
+            background: #E6F1FB;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+        }
+
+        .status-banner h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-banner p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .timeline-item {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -3.5rem;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid var(--white);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: -3.1rem;
+            top: 24px;
+            width: 1px;
+            height: calc(100% + 1.5rem);
+            background: var(--border-color);
+        }
+
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+
+        .timeline-card {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-card:hover {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 4px 12px rgba(24, 95, 165, 0.1);
+        }
+
+        .timeline-card.active {
+            background: var(--white);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(24, 95, 165, 0.15);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--accent);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 0.8rem;
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .phase-prepare { background: #FFF4E6; color: var(--warning); }
+        .phase-feedback { background: #E6F1FB; color: var(--primary); }
+        .phase-decision { background: #E6F1FB; color: var(--primary); }
+        .phase-live { background: #EAF3DE; color: var(--success); }
+        .phase-hypercare { background: #E6F1FB; color: var(--primary); }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0.8rem 0;
+        }
+
+        .timeline-expanded {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .timeline-card.active .timeline-expanded {
+            display: block;
+        }
+
+        .expanded-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .expanded-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+        }
+
+        .expanded-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .expanded-list li {
+            color: var(--text-secondary);
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+        }
+
+        .expanded-list li:before {
+            content: "→ ";
+            color: var(--primary);
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            background: var(--light-bg);
+            border-radius: var(--radius);
+            margin-bottom: 0.8rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .resource-link:hover {
+            background: #E6F1FB;
+            transform: translateX(4px);
+        }
+
+        .resource-icon {
+            font-size: 1.2rem;
+            min-width: 24px;
+        }
+
+        .resource-link-text {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: underline;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .resource-card {
+            background: linear-gradient(135deg, #F5F5F5 0%, var(--white) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .resource-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(24, 95, 165, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .resource-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resource-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .resource-card a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .resource-card a:hover {
+            gap: 0.8rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            border: 2px solid var(--primary);
+        }
+
+        .cta-button:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24, 95, 165, 0.2);
+        }
+
+        .cta-button.secondary {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .cta-button.secondary:hover {
+            background: var(--light-bg);
+        }
+
+        .key-dates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .date-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--white);
+            padding: 1.2rem;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .date-card .date {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .date-card .label {
+            font-size: 0.85rem;
+            opacity: 0.95;
+        }
+
+        .milestone-list {
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-top: 1.5rem;
+        }
+
+        .milestone-list ul {
+            list-style: none;
+        }
+
+        .milestone-list li {
+            padding: 0.8rem 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .milestone-list li:last-child {
+            border-bottom: none;
+        }
+
+        .milestone-list li:before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: 700;
+            margin-right: 0.8rem;
+        }
+
+        footer {
+            background: var(--text-primary);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .intro-text {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            background: #FCF3F0;
+            border-left: 4px solid var(--danger);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert h4 {
+            color: var(--danger);
+            margin-bottom: 0.5rem;
+        }
+
+        .alert p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-container {
+                padding-left: 2rem;
+            }
+
+            .timeline-dot {
+                left: -2.5rem;
+            }
+
+            .timeline-line {
+                left: -2.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Recordbase Permission Tiers</h1>
+        <p>Implementation Portal – September to October 2026</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#timeline">Timeline</a></li>
+            <li><a href="#resources">Resources</a></li>
+            <li><a href="#feedback">Feedback</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <section class="section" id="overview">
+            <h2 class="section-title">📋 Project Overview</h2>
+            
+            <div class="status-banner">
+                <h3>Current Status</h3>
+                <p><strong>Phase:</strong> Preparation & Distribution (15-17 September 2026)</p>
+                <p><strong>Next Milestone:</strong> Feedback collection opens 17 September</p>
+            </div>
+
+            <p class="intro-text">
+                We're implementing seven clearly defined permission tiers in Recordbase to replace legacy roles and improve security, privacy, and audit compliance. This portal brings together all the information you need to understand the changes, review your proposed access, and provide feedback.
+            </p>
+
+            <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">What's changing?</h3>
+            <div class="milestone-list">
+                <ul>
+                    <li>Legacy Recordbase roles replaced with seven clear, role-aligned tiers</li>
+                    <li>Each user assigned one tier with documented permissions</li>
+                    <li>High-risk functions (deletion, templates, settings) centralized with Tier 1</li>
+                    <li>Tier 7 introduced: Referral Creator Only (for staff who create referrals only)</li>
+                    <li>One-week feedback period before live implementation</li>
+                    <li>Hypercare (Active monitoring & support) support available for 10 days after go-live</li>
+                </ul>
+            </div>
+
+            <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">The seven tiers</h3>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h3>🔐 Tier 1</h3>
+                    <p><strong>System Administrators</strong></p>
+                    <p>Full access. Manage permissions, templates, settings, and deletions.</p>
+                </div>
+                <div class="resource-card">
+                    <h3>👤 Tier 2</h3>
+                    <p><strong>User Account Administrators</strong></p>
+                    <p>Manage user accounts, referral entry, extracts, referrer management.</p>
+                </div>
+                <div class="resource-card">
+                    <h3>👥 Tier 3</h3>
+                    <p><strong> Service Delivery (Managers & Team Leaders)</strong></p>
+                    <p>Manage team members and cases. Limited editing and reporting access.</p>
+                </div>
+                <div class="resource-card">
+                    <h3>👨 Tier 4</h3>
+                    <p><strong> CSW Standard Users (Kaimahi) </strong></p>
+                    <p>Create and manage referrals and cases. View-only on transfers (team leads process).</p>
+                </div>
+                <div class="resource-card">
+                    <h3>📊 Tier 5</h3>
+                    <p><strong>Service Delivery (Directors) </strong></p>
+                    <p>View-only access for governance and decision-making visibility.</p>
+                </div>
+                <div class="resource-card">
+                    <h3>🔍 Tier 6</h3>
+                    <p><strong>Auditors/Funders</strong></p>
+                    <p>Restricted audit and reporting access to meet compliance requirements.</p>
+                </div>
+                <div class="resource-card">
+                    <h3>✍️ Tier 7</h3>
+                    <p><strong>Referral Creator Only</strong></p>
+                    <p>Limited access: Create referrals for their assigned team only. This tier is intended solely for staff who need to create referrals as part of their role. Access will only be granted following approval from the Quality Team and does not include any broader manager or administrative permissions.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section class="section" id="timeline">
+            <h2 class="section-title">📅 Implementation Timeline</h2>
+            
+            <p class="intro-text">
+                The implementation follows a structured schedule with built-in feedback, review, and hypercare phases. Click any phase to see details, activities, and resources.
+            </p>
+
+            <div class="key-dates">
+                <div class="date-card">
+                    <div class="date">Sep 15-17</div>
+                    <div class="label">Share permission levels</div>
+                </div>
+                <div class="date-card">
+                    <div class="date">Sep 17-23</div>
+                    <div class="label">Collect feedback</div>
+                </div>
+                <div class="date-card">
+                    <div class="date">Sep 24-25</div>
+                    <div class="label">Triage & decide</div>
+                </div>
+                <div class="date-card">
+                    <div class="date">Oct 1</div>
+                    <div class="label">Go live 🎯</div>
+                </div>
+                <div class="date-card">
+                    <div class="date">Oct 1-9</div>
+                    <div class="label">Hypercare support</div>
+                </div>
+                <div class="date-card">
+                    <div class="date">Oct 15</div>
+                    <div class="label">Post-implementation review</div>
+                </div>
+            </div>
+
+            <div class="timeline-container" style="margin-top: 2.5rem;">
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">15-17 Sep 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-prepare">Prepare & Share</span>
+                            Distribute permission levels
+                        </h3>
+                        <p class="timeline-desc">Share proposed permission-level information with all users organized by role and tier.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">Key Activities</div>
+                                <ul class="expanded-list">
+                                    <li>Share Directors Pack (full model review)</li>
+                                    <li>Issue tier-specific packs by role</li>
+                                    <li>Provide clear feedback instructions</li>
+                                </ul>
+                            </div>
+                            <div class="expanded-section">
+                                <div class="expanded-label">Resources</div>
+                                <a href="#resources" class="resource-link">
+                                    <span class="resource-icon">📊</span>
+                                    <span class="resource-link-text">Confirmed permission level spreadsheet</span>
+                                </a>
+                                <a href="#resources" class="resource-link">
+                                    <span class="resource-icon">📄</span>
+                                    <span class="resource-link-text">All tier pamphlets & guides</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">17-23 Sep 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-feedback">Feedback</span>
+                            Users review & respond
+                        </h3>
+                        <p class="timeline-desc">One-week feedback window. Users review their proposed tier and provide feedback on any missing permissions.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">Key Activities</div>
+                                <ul class="expanded-list">
+                                    <li>Users complete feedback forms</li>
+                                    <li>Managers/TLs support team review</li>
+                                    <li>Feedback reminder sent on 23 Sep</li>
+                                </ul>
+                            </div>
+                            <div class="expanded-section">
+                                <div class="expanded-label">Deadline</div>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">23 September 2026 at 5:00 PM</p>
+                            </div>
+                            <div class="expanded-section">
+                                <div class="expanded-label">Submit Feedback</div>
+                                <a href="#feedback" class="cta-button">Open feedback form</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">24-25 Sep 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-decision">Triage & Decide</span>
+                            Review all feedback
+                        </h3>
+                        <p class="timeline-desc">Data, IT, and Quality teams classify and make decisions on all feedback. Summary published.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">Key Activities</div>
+                                <ul class="expanded-list">
+                                    <li>Log every feedback item</li>
+                                    <li>Classify: Accept/Amend/Decline/Defer</li>
+                                    <li>Escalate high-risk items to Quality</li>
+                                    <li>Publish "What we heard" summary</li>
+                                </ul>
+                            </div>
+                            <div class="expanded-section">
+                                <div class="expanded-label">Owner</div>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">Data Team, IT Lead, Quality Lead</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">25-28 Sep 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-decision">Amend & Test</span>
+                            Apply approved amendments
+                        </h3>
+                        <p class="timeline-desc">Approved amendments applied. Technical verification. Go-live reminder sent on 28 September.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">Key Activities</div>
+                                <ul class="expanded-list">
+                                    <li>Apply approved permission changes</li>
+                                    <li>Technical verification by IT</li>
+                                    <li>Prepare user mapping freeze</li>
+                                    <li>Confirm rollback plan</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">1 Oct 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-live">Live</span>
+                            New permission tiers active
+                        </h3>
+                        <p class="timeline-desc">Approved permission tiers applied to live Recordbase. Hypercare channel opens.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">What Happens</div>
+                                <ul class="expanded-list">
+                                    <li>Before 8am: Data Team applies new tiers</li>
+                                    <li>8am: Smoke test (one user per tier)</li>
+                                    <li>8:30am: "We are live" email sent</li>
+                                    <li>Hypercare channel opens for support</li>
+                                </ul>
+                            </div>
+                            <div class="expanded-section">
+                                <div class="expanded-label">Support</div>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">Access issues triaged within 2 hours; fixes applied same working day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">1-9 Oct 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-hypercare">Hypercare</span>
+                            Active monitoring & support
+                        </h3>
+                        <p class="timeline-desc">Issues monitored and triaged. Approved corrections applied. Daily stand-ups with teams.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">Support Available</div>
+                                <ul class="expanded-list">
+                                    <li>Daily 15-minute stand-up (Data, IT, Quality)</li>
+                                    <li>Issues logged and triaged</li>
+                                    <li>Same-day fixes for high-priority items</li>
+                                    <li>Rollback decision if needed</li>
+                                </ul>
+                            </div>
+                            <div class="expanded-section">
+                                <div class="expanded-label">Success Target</div>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">No kaimahi unable to complete core work for more than one working day.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card" onclick="this.classList.toggle('active')">
+                        <span class="timeline-date">15 Oct 2026</span>
+                        <h3 class="timeline-title">
+                            <span class="phase-badge phase-hypercare">Review</span>
+                            Post-implementation audit
+                        </h3>
+                        <p class="timeline-desc">Post-implementation review completed. Audit record stored. Next quarterly review scheduled for February 2027.</p>
+                        <div class="timeline-expanded">
+                            <div class="expanded-section">
+                                <div class="expanded-label">Deliverables</div>
+                                <ul class="expanded-list">
+                                    <li>Issues raised, resolved, residual risks documented</li>
+                                    <li>Audit record stored and retrievable</li>
+                                    <li>Legacy roles retired</li>
+                                    <li>Quarterly review scheduled</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section class="section" id="resources">
+            <h2 class="section-title">📚 Resources & Links</h2>
+            
+            <p class="intro-text">
+                All key documents, pamphlets, spreadsheets, and forms are accessible from this central location. Links below are placeholders – replace them with your actual URLs.
+            </p>
+
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h3>📊 Permission Matrix</h3>
+                    <p>The definitive source of truth showing confirmed role mappings and permission levels for all seven tiers.</p>
+                    <a href="https://mahitahitrust-my.sharepoint.com/:x:/g/personal/gourav_saini_mahitahi_co_nz/IQCKFisCMPh-Sahw_tM73HGDAdK3ItD43PfnCwRMPuQxR7s?e=PdNh8N" target="_blank">View spreadsheet →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 1 – System Administrators</h3>
+                    <p>Permission level details and responsibilities for Tier 1 System Administrators.</p>
+                    <a href="https://example.com/tier-1-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 2 – User Account Administrators</h3>
+                    <p>Permission level details for User Account Administrators. Covers user management and referral entry.</p>
+                    <a href="https://example.com/tier-2-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 3 – Managers & Team Leaders</h3>
+                    <p>Permission level details for Managers and Team Leaders. Covers team management and limited editing.</p>
+                    <a href="https://example.com/tier-3-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 4 – Kaimahi</h3>
+                    <p>Permission level details for Kaimahi. Covers referral and case management with view-only transfer access.</p>
+                    <a href="https://example.com/tier-4-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 5 – Directors</h3>
+                    <p>Permission level details for Service Delivery Directors. View-only access for governance and oversight.</p>
+                    <a href="https://example.com/tier-5-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 6 – Auditors/Funders</h3>
+                    <p>Permission level details for Auditors and Funders. Restricted access for compliance and audit purposes.</p>
+                    <a href="https://example.com/tier-6-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📄 Tier 7 – Referral Creator Only</h3>
+                    <p>Permission level details for Referral Creator Only users. Limited access for creating referrals only.</p>
+                    <a href="https://example.com/tier-7-guide" target="_blank">Open guide →</a>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.8rem;"><em>(Click here)</em></p>
+                </div>
+            </div>
+
+            <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">Additional Documentation</h3>
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h3>📋 Implementation Plan</h3>
+                    <p>Full project plan with timeline, stakeholders, responsibilities, and success criteria.</p>
+                    <a href="https://mahitahitrust-my.sharepoint.com/:w:/g/personal/gourav_saini_mahitahi_co_nz/IQCOIZkWLz_HRI3rqyXMKNUXAd9tww3Ltq0McFb7zmmhHMg?e=dchVmY" target="_blank">View document →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h3>❓ FAQ</h3>
+                    <p>Frequently asked questions about the permission tiers, implementation, and user impact.</p>
+                    <a href="#faq" target="_blank">Read FAQ →</a>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📞 Support & Contact</h3>
+                    <p>Contact information for Data Team, IT, and Quality teams during implementation and hypercare.</p>
+                    <a href="mailto:gourav.saini@mahitahi.co.nz,meegan.herewini@mahitahi.co.nz,quality@mahitahi.co.nz,datateam@mahitahi.co.nz" target="_blank">Email support →</a>
+                </div>
+            </div>
+        </section>
+
+      <!-- Feedback Section -->
+        <section class="section" id="feedback">
+            <h2 class="section-title">💬 Provide Feedback</h2>
+            
+            <p class="intro-text">
+                Your feedback is critical to the success of this implementation. If you believe permissions required for your role have been removed or restricted, please complete the feedback form below with your observations and justifications.
+            </p>
+ 
+            <div class="status-banner">
+                <h3>Feedback Deadline</h3>
+                <p><strong>23 September 2026 at 5:00 PM</strong></p>
+                <p>Submit your feedback during the one-week review period. Late submissions may not be reviewed before go-live.</p>
+            </div>
+ 
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">What we're asking you to review</h3>
+            <div class="milestone-list">
+                <ul>
+                    <li>Does your proposed tier match your role and day-to-day responsibilities?</li>
+                    <li>Are the access levels appropriate and clear?</li>
+                    <li>Are there any privacy, confidentiality, or operational risks?</li>
+                    <li>Are any permissions missing that you need to perform your role effectively?</li>
+                    <li>If permissions are missing, why are they required and what's the business impact?</li>
+                </ul>
+            </div>
+ 
+            <div style="margin-top: 2rem; padding: 1.5rem; background: #EAF3DE; border-radius: var(--radius); border-left: 4px solid var(--success);">
+                <h3 style="color: var(--success); margin-bottom: 1rem;">📋 Ready to provide feedback?</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Open the Microsoft Form below to complete the feedback questionnaire.</p>
+                <a href="https://forms.cloud.microsoft/r/qHbF7X6HVy" target="_blank" class="cta-button">Open feedback form</a>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 1rem;"><em>(Please click on the "Open feedback form" button above to give your feedback)</em></p>
+            </div>
+
+            <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">How feedback is processed</h3>
+            <div style="background: var(--light-bg); padding: 1.5rem; border-radius: var(--radius);">
+                <ol style="color: var(--text-secondary); line-height: 1.8; margin-left: 1.5rem;">
+                    <li><strong>Collection:</strong> Feedback received during 17-23 September</li>
+                    <li><strong>Triage:</strong> Data, IT, and Quality classify each item (24-25 September)</li>
+                    <li><strong>Decision:</strong> Items classified as Accept/Amend/Decline/Defer</li>
+                    <li><strong>Summary:</strong> "What we heard, what changed, what did not and why" published 25 September</li>
+                    <li><strong>Amendment:</strong> Approved changes applied 25-28 September</li>
+                    <li><strong>Go-live:</strong> Final tiers implemented 1 October</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="section" id="faq">
+            <h2 class="section-title">❓ Frequently Asked Questions</h2>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">Why are we changing permission tiers?</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Legacy Recordbase roles have accumulated over time and no longer provide clear, consistent access levels aligned to user responsibilities. The new seven-tier system improves record quality, protects privacy, meets audit/funder requirements, and ensures access is least-privileged and role-based.
+                </p>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">Will I lose access to things I need?</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    That's exactly why we're asking for your feedback during the one-week review period. If you believe a permission required for your role has been removed, we want to hear about it with your justification. The Data and Quality teams will review all feedback and make adjustments before go-live.
+                </p>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">What's Tier 7 – Referral Creator Only?</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Tier 7 has been created for staff who are responsible for creating referrals for their team. Access is limited to referral creation functions only, helping maintain security, privacy, and least-privilege principles. This access may also be granted temporarily to approved staff, following the access request process that will be provided separately by the Quality Team.
+                </p>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">What happens if something goes wrong on 1 October?</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Hypercare support (Active monitoring & Support) will be available from 1-9 October. Access issues are monitored and triaged within 2 hours; fixes are applied the same working day where they align with the confirmed permission model. A rollback plan is ready if a High-severity issue affects a whole tier and cannot be fixed same day.
+                </p>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">Who do I contact with questions?</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    <strong>Before 1 October (feedback & planning):</strong> Contact the Project Lead (Gourav Saini), Service Coordinator (Meegan Herewini) <br>
+                    <strong>1-9 October (Active monitoring & Support):</strong> Reach out to Service Coordinator (Meegan Herewini), Data Team or contact your team leader or manager<br>
+                    <strong>After 9 October:</strong> Contact Quality Team for access review requests
+                </p>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">Can I request a temporary access to another tier after go-live?</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Yes. The Quality Team manages a formal process for requesting temporary access to a different permission tier. Process details will be shared by Quality Team.
+                </p>
+
+                               </p>
+            </div>
+        </section>
+
+        <!-- Key Contacts -->
+        <section class="section">
+            <h2 class="section-title">👥 Key Contacts</h2>
+            
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h3>📧 Data Team</h3>
+                    <p>Questions about permission tiers, feedback, and user mapping.</p>
+                    <a href="mailto:datateam@mahitahi.co.nz">datateam@mahitahi.co.nz</a>
+                </div>
+
+                <div class="resource-card">
+                    <h3>🔧 IT Support</h3>
+                    <p>Technical issues, login problems, and access troubleshooting.</p>
+                    <a href="mailto:support@wildbamboo.co.nz,ashwin.lal@mahitahi.co.nz ">support@wildbamboo.co.nz ashwin.lal@mahitahi.co.nz</a>
+                </div>
+
+                <div class="resource-card">
+                    <h3>✓ Quality Team</h3>
+                    <p>Privacy, confidentiality, and audit compliance questions.</p>
+                    <a href="mailto:quality@mahitahi.co.nz">quality@mahitahi.co.nz</a>
+                </div>
+
+                <div class="resource-card">
+                    <h3>📌 Project Lead</h3>
+                    <p>General project questions and escalations.</p>
+                    <a href="mailto:gourav.saini@mahitahi.co.nz">gourav.saini@mahitahi.co.nz</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Recordbase Permission Tiers Implementation Portal</p>
+        <p>Prepared by: Data, IT & Quality Teams | Version 1.0 | September 2026</p>
+        <p style="margin-top: 1rem; font-size: 0.85rem; opacity: 0.8;">Confidential – Internal use only. Contains details of system access controls.</p>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.timeline-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.timeline-card').forEach(c => {
+                    if (c !== this) c.classList.remove('active');
+                });
+                this.classList.toggle('active');
+            });
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
