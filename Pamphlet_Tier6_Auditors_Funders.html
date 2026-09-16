@@ -1,0 +1,130 @@
+<!doctype html><html lang="en-NZ"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auditors / Funders — Recordbase tier pamphlet</title>
+<style>
+:root{--ink:#17302B;--soft:#4A5B56;--paper:#FCFBF8;--rule:#DAD5C9;
+--yes:#1D5C4C;--yes-bg:#E4F0EA;--no:#8A2B2B;--no-bg:#F7E9E7;--warn-bg:#FAF6EC;--warn-line:#E3D7B8;}
+*{box-sizing:border-box}
+body{margin:0;background:#EFEDE6;font:15px/1.55 "Inter","Segoe UI",system-ui,sans-serif;color:var(--ink)}
+.sheet{max-width:860px;margin:28px auto;background:var(--paper);
+  box-shadow:0 2px 18px rgba(23,48,43,.12)}
+h1,h2,h3{font-family:Georgia,"Iowan Old Style",serif;font-weight:600;letter-spacing:-.01em}
+p{margin:.45rem 0 .8rem}
+
+.band{background:var(--accent);color:#fff;padding:28px 40px 26px;position:relative;overflow:hidden}
+.band::after{content:attr(data-num);position:absolute;right:18px;top:-28px;
+  font-family:Georgia,serif;font-size:11rem;line-height:1;color:rgba(255,255,255,.11);font-weight:700}
+.band .eyebrow{font-size:.8rem;color:rgba(255,255,255,.78);margin:0 0 10px}
+.band h1{margin:0;font-size:2.05rem;color:#fff;line-height:1.12;position:relative;z-index:1}
+.band .who{margin:8px 0 0;font-size:1rem;color:rgba(255,255,255,.9);position:relative;z-index:1}
+
+.body{padding:30px 40px 38px}
+.oneline{font-size:1.12rem;line-height:1.5;color:var(--ink);border-left:4px solid var(--accent);
+  padding:4px 0 4px 16px;margin:0 0 26px;max-width:70ch}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-bottom:26px}
+.col h2{font-size:1.05rem;margin:0 0 10px;padding-bottom:7px;border-bottom:2px solid var(--rule)}
+.col.can h2{color:var(--yes);border-bottom-color:var(--yes)}
+.col.cant h2{color:var(--no);border-bottom-color:var(--no)}
+.col ul{margin:0;padding:0;list-style:none}
+.col li{position:relative;padding:6px 0 6px 24px;font-size:.93rem;border-bottom:1px solid #ECE8DF}
+.col li:last-child{border-bottom:none}
+.col.can li::before{content:"";position:absolute;left:2px;top:12px;width:9px;height:9px;
+  background:var(--yes);border-radius:2px}
+.col.cant li::before{content:"";position:absolute;left:2px;top:12px;width:9px;height:2px;background:var(--no)}
+
+.states{margin:0 0 26px}
+.states h2{font-size:1.05rem;margin:0 0 10px}
+.states table{width:100%;border-collapse:collapse;font-size:.9rem}
+.states th{text-align:left;background:var(--ink);color:#F1EFE7;padding:8px 12px;font-size:.8rem;font-weight:600}
+.states td{padding:9px 12px;border-bottom:1px solid var(--rule);background:#fff;vertical-align:top}
+.states td:first-child{font-weight:600;width:34%}
+.states tr:nth-child(even) td{background:#F8F6F1}
+
+.watch{background:var(--warn-bg);border:1px solid var(--warn-line);padding:16px 20px;margin:0 0 24px}
+.watch h2{font-size:1rem;margin:0 0 8px}
+.watch ul{margin:0;padding-left:1.05rem}
+.watch li{margin:.35rem 0;font-size:.92rem}
+
+/* --- source spreadsheet --- */
+.source{display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--rule);
+  border-left:4px solid var(--accent);padding:18px 22px;margin:0 0 24px}
+.source .icon{flex:0 0 auto;width:38px;height:38px;color:var(--accent);margin-top:2px}
+.source .icon svg{width:100%;height:100%;display:block}
+.source .txt{flex:1 1 auto;min-width:0}
+.source h2{font-size:1.05rem;margin:0 0 4px}
+.source p{font-size:.92rem;margin:.3rem 0;color:var(--soft);max-width:66ch}
+.source p strong{color:var(--ink)}
+.tab{display:inline-block;background:#F2EFE8;border:1px solid var(--rule);border-radius:3px;
+  padding:1px 8px;font-size:.86rem;font-weight:600;color:var(--ink);white-space:nowrap}
+.source .btn{display:inline-block;margin-top:12px;background:var(--accent);color:#fff;
+  text-decoration:none;padding:9px 18px;font-size:.88rem;font-weight:600;border-radius:3px}
+.source .btn:hover{filter:brightness(1.12)}
+.source .url{display:none}
+
+.ask{background:var(--ink);color:#E9F1EE;padding:20px 24px;margin:0 0 22px}
+.ask h2{margin:0 0 8px;font-size:1.05rem;color:#fff}
+.ask ol{margin:0;padding-left:1.2rem;font-size:.93rem}
+.ask li{margin:.3rem 0}
+.ask .when{margin-top:14px;background:#294B43;border-left:3px solid #7FC2AC;padding:9px 13px;font-size:.9rem}
+
+.foot{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--rule);
+  padding-top:14px;font-size:.82rem;color:var(--soft);flex-wrap:wrap}
+
+@media print{
+  body{background:#fff} .sheet{margin:0;box-shadow:none;max-width:none}
+  .band{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .band,.states th,.ask,.source,.col.can li::before,.col.cant li::before{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .source{break-inside:avoid}
+  .source .btn{background:none;color:var(--ink);padding:0;margin-top:8px;text-decoration:underline}
+  .source .url{display:block;font-size:.78rem;color:var(--soft);word-break:break-all;margin-top:4px}
+  @page{size:A4;margin:10mm}
+}
+@media(max-width:700px){
+  .cols{grid-template-columns:1fr}.body,.band{padding-left:22px;padding-right:22px}
+  .source{flex-direction:column;gap:10px}
+}
+</style></head><body>
+<div class="sheet" style="--accent:#6E6961">
+  <div class="band" data-num="6">
+    <p class="eyebrow">Recordbase permission tiers · Data, IT &amp; Quality · September 2026</p>
+    <h1>Tier 6 — Auditors / Funders</h1>
+    <p class="who">External auditors and funders · Limited access</p>
+  </div>
+  <div class="body">
+    <p class="oneline">A narrow, read-only window into Recordbase — enough to verify data for auditing purpose, without exposing to highlevel access.</p>
+    <div class="cols">
+      <div class="col can"><h2>What you can do</h2><ul><li>View personal details</li><li>View activities</li><li>View attachments</li><li>View referrals</li><li>See the same limited information across open, discharged and closed referrals</li></ul></div>
+      <div class="col cant"><h2>What you cannot do</h2><ul><li>Health, health interactions, medical tests, medication and prescriptions</li><li>Notes, risks, alerts and tasks</li><li>Education, employment history and employment plans</li><li>Wellness plans, personal plans, outcomes tools and PRIMHD status reviews</li><li>Daily care events, protocols, injury claims and direct messages</li><li>Create, edit or delete anything</li><li>Group activities, extracts and all administration</li></ul></div>
+    </div>
+    <div class="states"><h2>What changes as a referral moves on</h2>
+      <table><thead><tr><th>Referral state</th><th>Your access</th></tr></thead><tbody><tr><td>Open referrals</td><td>View Only, on the four permitted modules</td></tr><tr><td>Recently discharged</td><td>View Only, on the four permitted modules</td></tr><tr><td>Closed referrals</td><td>View Only, on the four permitted modules</td></tr></tbody></table></div>
+    <div class="watch"><h2>Conditions on this access</h2><ul><li>Any additional information needed for an audit must be approved by the Quality Team before access is granted.</li><li>Access should be time-bound to the audit or funding period, with a removal date recorded when it is granted.</li><li>Clinical detail is deliberately closed to this tier — that is a privacy decision, not an oversight.</li><li>Confirm this access is sufficient for the audit or funding requirement before go-live.</li></ul></div>
+    <div class="source">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M12 13v4"/>
+        </svg>
+      </div>
+      <div class="txt">
+        <h2>Full permission layout — source spreadsheet</h2>
+        <p>This pamphlet is a summary. The complete, module-by-module permission layout for every tier lives in the
+        master spreadsheet, confirmed by the Data, IT and Quality teams.</p>
+        <p>Open the <span class="tab">Tier 6 – Auditors</span> tab to see the full layout for this tier.</p>
+        <p>The spreadsheet also holds a <span class="tab">Definition and Instruction</span> tab explaining how to read
+        the access values and referral states, plus a separate tab for each of the other tiers.</p>
+        <a class="btn" href="https://mahitahitrust-my.sharepoint.com/:x:/g/personal/gourav_saini_mahitahi_co_nz/IQCKFisCMPh-Sahw_tM73HGDAdK3ItD43PfnCwRMPuQxR7s?e=8pZkiR">Open the permission layout spreadsheet</a>
+        <span class="url">https://mahitahitrust-my.sharepoint.com/:x:/g/personal/gourav_saini_mahitahi_co_nz/IQCKFisCMPh-Sahw_tM73HGDAdK3ItD43PfnCwRMPuQxR7s?e=8pZkiR</span>
+      </div>
+    </div>
+
+    <div class="ask">
+      <h2>What we need from you</h2>
+      <ol><li>Confirm the four permitted modules give you what an audit or funding review requires.</li><li>Tell us, via the Quality Team, if something essential is missing.</li><li>Confirm the approval route for additional access is workable.</li><li>Confirm the access period and removal date for each audit engagement.</li><li>Raise any concern about the visibility of whaiora information.</li></ol>
+    </div>
+    <div class="foot">
+      <span>Source: "Recordbase Permissions Layout- Updated and confirmed with Traci-Mae" spreadsheet file designed by IT manager, reviewed and confirmed by Deputy CEO, Data, IT, and Quality</span>
+    </div>
+  </div>
+</div></body></html>
